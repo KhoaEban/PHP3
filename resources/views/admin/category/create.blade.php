@@ -13,6 +13,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="fw-bold">Danh mục cha:</label>
+                        <select name="parent_id" class="form-control">
+                            <option value="">-- Chọn danh mục cha (nếu có) --</option>
+                            @foreach ($parentCategories as $parent)
+                                <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="fw-bold">Mô tả:</label>
                         <textarea name="description" class="form-control" rows="3"></textarea>
                     </div>

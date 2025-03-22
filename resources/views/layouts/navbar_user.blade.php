@@ -21,9 +21,7 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     {{-- Font Awesome --}}
     <script src="https://kit.fontawesome.com/d70c32c211.js" crossorigin="anonymous"></script>
-
-
-
+    
     <!-- Favicons -->
     <link href="/img/favicon.png" rel="icon">
     <link href="/img/apple-touch-icon.png" rel="apple-touch-icon">

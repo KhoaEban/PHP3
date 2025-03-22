@@ -26,6 +26,7 @@
                         <th>#</th>
                         <th>Hình ảnh</th>
                         <th>Tên danh mục</th>
+                        <th>Danh mục cha</th>
                         <th>Slug</th>
                         <th>Mô tả</th>
                         <th>Hành động</th>
@@ -44,6 +45,9 @@
                                 @endif
                             </td>
                             <td class="fw-bold">{{ $category->name }}</td>
+                            <td>
+                                {{ $category->parent ? $category->parent->name : '---' }}
+                            </td>                            
                             <td>{{ $category->slug }}</td>
                             <td>{{ $category->description }}</td>
                             <td>

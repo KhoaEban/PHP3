@@ -10,8 +10,18 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'description', 'image'];
+    protected $fillable = ['name', 'slug', 'description', 'image', 'parent_id'];
 
+    // thêm quan hệ cha - con
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
 
     // Tạo slug tự động khi tạo danh mục
     protected static function boot()

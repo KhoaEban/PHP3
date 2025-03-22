@@ -13,6 +13,18 @@
                         <input class="form-control" name="name" value="{{ $category->name }}" required>
                     </div>
                     <div class="mb-3">
+                        <label class="fw-bold">Danh mục cha:</label>
+                        <select name="parent_id" class="form-control">
+                            <option value="">-- Chọn danh mục cha (nếu có) --</option>
+                            @foreach ($parentCategories as $parent)
+                                <option value="{{ $parent->id }}"
+                                    {{ $category->parent_id == $parent->id ? 'selected' : '' }}>
+                                    {{ $parent->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="fw-bold">Mô tả:</label>
                         <textarea class="form-control" name="description" rows="3">{{ $category->description }}</textarea>
                     </div>
