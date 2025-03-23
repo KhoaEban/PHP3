@@ -33,8 +33,8 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('products.index') }}" class="btn btn-secondary">Quay lại</a>
-                        <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
+                        <a href="{{ route('category.index') }}" class="btn btn-secondary">Quay lại</a>
+                        <button type="submit" class="btn btn-primary">Thêm danh mục</button>
                     </div>
                 </form>
             </div>

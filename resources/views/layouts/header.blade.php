@@ -6,7 +6,7 @@
     <meta name="author" content="" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('title', 'Laravel') }}</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -29,4 +29,27 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 
     <link href="{{ asset('css/styles_admin.css') }}" rel="stylesheet" />
+
+    <style>
+        /* Làm cho tất cả input, select, textarea vuông */
+        input,
+        select,
+        textarea,
+        button {
+            border-radius: 0 !important;
+            /* Bỏ bo góc */
+        }
+
+        /* Điều chỉnh nút bấm cũng vuông */
+        .btn {
+            border-radius: 0 !important;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none !important;
+            /* Hiệu ứng focus */
+        }
+    </style>
 </head>

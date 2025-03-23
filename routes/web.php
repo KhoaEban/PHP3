@@ -28,13 +28,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/update/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/delete/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-    // Route category admin
-    Route::get('/admin/category', [CategoryController::class, 'index'])->name('category.index');
-    Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
-    Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
-    Route::get('/category/edit/{category}', [CategoryController::class, 'edit'])->name('category.edit');
-    Route::put('/category/update/{category}', [CategoryController::class, 'update'])->name('category.update');
-    Route::delete('/category/delete/{category}', [CategoryController::class, 'destroy'])->name('category.destroy');
+    // Route quản lý danh mục trong Admin
+    Route::prefix('admin')->middleware(['auth'])->group(function () {
+        Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
+        Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
+        Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
+
+        Route::get('/category/edit/{category}', [CategoryController::class, 'edit'])->name('category.edit');
+        Route::put('/category/update/{category}', [CategoryController::class, 'update'])->name('category.update');
+        Route::delete('/category/{category}', [CategoryController::class, 'destroy'])->name('category.destroy');
+
+        Route::get('/category/create-sub/{parent_id}', [CategoryController::class, 'createSubcategory'])->name('category.create.sub');
+        Route::put('/category/remove-parent/{id}', [CategoryController::class, 'removeParent'])->name('category.remove_parent');
+        Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
+    });
 });
 
 // Route cho user
