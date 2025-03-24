@@ -1,8 +1,10 @@
 @extends('layouts.navbar_admin')
 
 @section('content')
+    <div class="card-title mt-3" style="background-color: #B0C4DE">
+        <h1 class="h6 p-3">Quản lý danh mục</h1>
+    </div>
     <div class="container-fluid mt-4">
-        <h1 class="text-center fw-bold">Quản lý danh mục</h1>
 
         <div class="row mt-4">
             {{-- Cột trái: Form thêm danh mục --}}
@@ -97,7 +99,8 @@
                                 @if ($category->children->count() > 0)
                                     <ul class="list-group ms-4 m-1">
                                         @foreach ($category->children as $sub)
-                                            <li class="list-group-item d-flex justify-content-between align-items-center" style="border-radius: 0px">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                style="border-radius: 0px">
                                                 <div class="d-flex align-items-center">
                                                     <span class="me-2">--</span>
                                                     @if ($sub->image)

@@ -1,6 +1,9 @@
 @extends('layouts.navbar_admin')
 
 @section('content')
+    <div class="card-title mt-3" style="background-color: #B0C4DE">
+        <h1 class="h6 p-3">Chi tiết danh mục</h1>
+    </div>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
@@ -20,7 +23,8 @@
                         {{-- Hình ảnh danh mục --}}
                         <div class="mb-3">
                             @if ($category->image)
-                                <img src="{{ asset($category->image) }}" alt="{{ $category->name }}" width="300" class="img-thumbnail">
+                                <img src="{{ asset($category->image) }}" alt="{{ $category->name }}" width="300"
+                                    class="img-thumbnail">
                             @else
                                 <span class="text-muted">Không có hình ảnh</span>
                             @endif
@@ -35,17 +39,21 @@
                                         <div>
                                             {{-- Ảnh danh mục con --}}
                                             @if ($subcategory->image)
-                                                <img src="{{ asset($subcategory->image) }}" alt="{{ $subcategory->name }}" width="40" class="rounded-circle me-2">
+                                                <img src="{{ asset($subcategory->image) }}" alt="{{ $subcategory->name }}"
+                                                    width="40" class="rounded-circle me-2">
                                             @endif
-                                            <a href="{{ route('category.show', $subcategory->id) }}" class="text-decoration-none">{{ $subcategory->name }}</a>
+                                            <a href="{{ route('category.show', $subcategory->id) }}"
+                                                class="text-decoration-none">{{ $subcategory->name }}</a>
                                         </div>
 
                                         {{-- Hành động --}}
                                         <div>
-                                            <a href="{{ route('category.edit', $subcategory->id) }}" class="btn btn-warning btn-sm">
+                                            <a href="{{ route('category.edit', $subcategory->id) }}"
+                                                class="btn btn-warning btn-sm">
                                                 <i class="fas fa-edit"></i> Sửa
                                             </a>
-                                            <form action="{{ route('category.remove_parent', $subcategory->id) }}" method="POST" class="d-inline">
+                                            <form action="{{ route('category.remove_parent', $subcategory->id) }}"
+                                                method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PUT')
                                                 <button type="submit" class="btn btn-secondary btn-sm">

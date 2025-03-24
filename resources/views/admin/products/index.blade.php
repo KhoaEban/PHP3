@@ -1,67 +1,157 @@
 @extends('layouts.navbar_admin')
 
 @section('content')
-    <div class="container mt-4">
-        <h1 class="text-center text-primary">Danh sách sản phẩm</h1>
-
-        <div class="d-flex justify-content-between my-3">
-            <a href="{{ route('products.create') }}" class="btn border rounded-pill"><i class="fas fa-plus"></i> Thêm sản
-                phẩm</a>
-
-            {{-- Thanh tìm kiếm sản phẩm --}}
-            <form method="GET" action="{{ route('products.index') }}"
-                class="search-form d-flex align-items-center m-0 border rounded-pill px-3">
-                <input class="p-2 border-0" style="outline: none;" name="search" type="search"
-                    placeholder="Tìm kiếm sản phẩm" aria-label="Search" value="{{ request('search') }}">
-                <button class="search-icon m-0 p-2 border-0 bg-transparent" style="outline: none;" type="submit">
-                    <i class="fas fa-search"></i>
+    <div class="container-fluid mt-4">
+        <div class="header">
+            <h1>Sản phẩm</h1>
+            <div class="buttons mx-2">
+                <a href="{{ route('products.create') }}" class="text-white text-decoration-none d-flex align-items-center">
+                    <button>
+                        <i class="fas fa-plus me-1"></i>
+                        Thêm sản phẩm
+                    </button>
+                </a>
+                {{-- <button>
+                    Import
                 </button>
-            </form>
+                <button>
+                    Export
+                </button> --}}
+            </div>
         </div>
-
-        <div class="table-responsive">
-            <table class="table table-striped table-hover text-center align-middle">
-                <thead class="table-primary">
+        <div class="filters">
+            <div class="">
+                <select>
+                    <option>
+                        Bulk actions
+                    </option>
+                </select>
+                <button>
+                    Apply
+                </button>
+                <select>
+                    <option>
+                        Select a category
+                    </option>
+                </select>
+                <select>
+                    <option>
+                        Filter by brand
+                    </option>
+                </select>
+                <button>
+                    Filter
+                </button>
+            </div>
+            <div class="">
+                {{-- Thanh tìm kiếm sản phẩm --}}
+                <form method="GET" action="{{ route('products.index') }}"
+                    class="search-form d-flex align-items-center m-0 border px-3" style="width: 500px;">
+                    <input class="p-2 border-0" style="outline: none; width: 100%;" name="search" type="search"
+                        placeholder="Tìm kiếm sản phẩm" aria-label="Search" value="{{ request('search') }}">
+                    <button class="search-icon m-0 p-2 border-0 bg-transparent text-muted" style="outline: none;"
+                        type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="responsive-table">
+            <table class="text-center">
+                <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Hình ảnh</th>
-                        <th>Danh mục</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Mô tả</th>
-                        <th>Giá</th>
-                        <th>Tồn kho</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
+                        <th>
+                            <input type="checkbox" />
+                        </th>
+                        <th>
+                            Tên
+                            <i class="fas fa-sort">
+                            </i>
+                        </th>
+                        {{-- <th>
+                            SKU
+                            <i class="fas fa-sort">
+                            </i>
+                        </th> --}}
+                        <th>
+                            Số lượng
+                        </th>
+                        <th>
+                            Giá
+                            <i class="fas fa-sort">
+                            </i>
+                        </th>
+                        <th>
+                            Danh mục
+                        </th>
+                        <th>
+                            Ngày tạo
+                            <i class="fas fa-sort">
+                            </i>
+                        </th>
+                        <th>
+                            Trạng thái
+                        </th>
+                        <th>
+                            Thương hiệu
+                        </th>
+                        <th>
+                            Thao tác
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($products as $key => $product)
                         <tr>
-                            <td>{{ ($products->currentPage() - 1) * $products->perPage() + $loop->iteration }}</td>
                             <td>
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
-                                    width="100">
+                                <input type="checkbox" />
                             </td>
-                            <td>{{ $product->category->name ?? 'Không có danh mục' }}</td> <!-- Hiển thị danh mục -->
-                            <td class="fw-bold">{{ $product->title }}</td>
-                            <td>{{ $product->description }}</td>
-                            <td class="text-danger fw-bold">{{ number_format($product->price, 0, ',', '.') }} VNĐ</td>
-                            <td>{{ $product->stock }}</td>
+                            <td>
+
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
+                                    width="50">
+                            </td>
+                            {{-- <td>
+                                CP06
+                            </td> --}}
+                            <td class="status-in-stock">
+                                In stock ({{ $product->stock }})
+                            </td>
+                            <td>
+                                {{-- 30.000 VND – 35.000 VND --}}
+                                {{ number_format($product->price, 0, ',', '.') }} VND
+                            </td>
+                            <td>
+                                {{-- Bánh miếng nhỏ, Uncategorized --}}
+                                {{ $product->category->name ?? 'Không có danh mục' }}
+                            </td>
+                            <td>
+                                Published
+                                <br />
+                                {{ $product->created_at->format('d/m/Y') }}
+                            </td>
                             <td>
                                 <span class="badge {{ $product->status ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $product->status ? '✅ Hiển thị' : '❌ Ẩn' }}
+                                    {{ $product->status ? 'Hiển thị' : 'Ẩn' }}
                                 </span>
                             </td>
-                            <td>
-                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>Sửa
+                            <td class="brands">
+                                {{ $product->brand->name ?? 'Không có thương hiệu' }}
+                            </td>
+                            <td class="action">
+                                <a href="{{ route('products.edit', $product->id) }}"
+                                    class="text-decoration-none text-dark">
+                                    <button type="button" class="btn btn-sm" style="background-color: #F0E68C">
+                                        <i class="fas fa-edit"></i>
+                                        Sửa
+                                    </button>
                                 </a>
                                 <form action="{{ route('products.destroy', $product->id) }}" method="POST"
                                     class="delete-form d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm btn-delete"><i
-                                            class="fas fa-trash"></i> Xóa</button>
+                                    <button type="button" class="btn btn-sm btn-delete text-white"
+                                        style="background-color: #CD5C5C"><i class="fas fa-trash"></i> Xóa</button>
                                 </form>
                             </td>
                         </tr>
@@ -73,9 +163,9 @@
                 </tbody>
             </table>
         </div>
-
+        <br>
         {{-- Phân trang --}}
-        <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center gap-3">
             {{ $products->appends(['search' => request('search')])->links('pagination::bootstrap-5') }}
         </div>
     </div>

@@ -1,14 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\User\UserController;
-use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+// Route cho admin
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BrandController;
+// Route cho user
+use App\Http\Controllers\User\UserController;
 
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
@@ -41,6 +43,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/category/create-sub/{parent_id}', [CategoryController::class, 'createSubcategory'])->name('category.create.sub');
         Route::put('/category/remove-parent/{id}', [CategoryController::class, 'removeParent'])->name('category.remove_parent');
         Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
+    });
+    Route::prefix('admin')->group(function () {
+        Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
+        Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
+        Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
+        Route::put('/brands/update/{id}', [BrandController::class, 'update'])->name('brands.update');
+        Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
     });
 });
 

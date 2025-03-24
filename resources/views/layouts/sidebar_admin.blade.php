@@ -15,14 +15,16 @@
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
                             data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
                             <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Thành phần
+                            Sản phẩm
                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
                         <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
                             data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="{{ route('products.index') }}">Danh sách sản phẩm</a>
-                                <a class="nav-link" href="{{ route('category.index') }}">Danh sách danh mục</a>
+                                <a class="nav-link" href="{{ route('products.index') }}">Tất cả sản phẩm</a>
+                                <a class="nav-link" href="{{ route('category.index') }}">Danh mục</a>
+                                <a class="nav-link" href="{{ route('brands.index') }}">Thương hiệu</a>
+                                {{-- <a class="nav-link" href="{{ route('product-type.index') }}">Loại sản phẩm</a> --}}
                             </nav>
                         </div>
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
@@ -81,12 +83,10 @@
                 </div>
             </nav>
         </div>
-        <div id="layoutSidenav_content">
-
+        <div id="layoutSidenav_content" style="background-color: #F0F0F1">
             <main>
                 @yield('content')
             </main>
-
 
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
@@ -106,3 +106,133 @@
     </script>
     <script src="{{ asset('js/scripts.js') }}"></script>
 </body>
+
+<style>
+    .header {
+        display: flex;
+        /* justify-content: space-between; */
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+        margin: 0;
+    }
+
+    .header .buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .header .buttons button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #0073aa;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .header .buttons button:hover {
+        background-color: #005a8c;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: space-between;
+    }
+
+    .filters select,
+    .filters input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .filters button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #0073aa;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .filters button:hover {
+        background-color: #005a8c;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table th,
+    table {
+        padding: 10px;
+        text-align: left;
+    }
+
+    thead tr {
+        border: 1px solid #ccc;
+    }
+
+    tbody {
+        border: 1px solid #ccc;
+    }
+
+
+    tr:hover {
+        background-color: #ddd;
+    }
+
+    td {
+        border: none;
+        text-align: left;
+        padding: 10px;
+    }
+
+    table th {
+        background-color: #f9f9f9;
+    }
+
+    table th i {
+        margin-left: 5px;
+        cursor: pointer;
+    }
+
+    .status-in-stock {
+        color: green;
+    }
+
+    .status-out-of-stock {
+        color: red;
+    }
+
+    .stats {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .stats i {
+        color: #0073aa;
+    }
+
+    .brands i {
+        color: red;
+    }
+
+    .brands .gray {
+        color: gray;
+    }
+
+    .responsive-table {
+        overflow-x: auto;
+    }
+
+    .small {
+        margin-right: 5px;
+    }
+</style>
