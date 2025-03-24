@@ -59,7 +59,7 @@
                     </li>
                     {{-- Sản phẩm --}}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Sản phẩm</a>
+                        <a class="nav-link" href="{{ route('user.products') }}">Sản phẩm</a>
                     </li>
                     {{-- About --}}
                     <li class="nav-item">
