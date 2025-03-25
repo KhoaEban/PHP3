@@ -169,11 +169,18 @@
         color: rgb(0, 0, 0) !important;
     }
 
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
     /* Màu chữ và hiệu ứng hover */
     .nav-link {
         color: rgb(0, 0, 0) !important;
         font-weight: 500;
         transition: color 0.3s ease-in-out;
+        padding: 0 !important;
     }
 
     .nav-link:hover {

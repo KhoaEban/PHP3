@@ -4,12 +4,13 @@
     {{-- Bredcrumb --}}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <div class="container d-flex align-items-center">
-                <li class="breadcrumb-item"><a href="{{ route('user.index') }}">Trang chủ</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Sản phẩm</li>
+            <div class="container">
+                {{ Breadcrumbs::render(request('category') ? 'category' : 'products', $categories->firstWhere('slug', request('category'))) }}
             </div>
         </ol>
     </nav>
+    
+
     <div class="container mt-4">
         <div class="row">
             {{-- Sidebar Lọc Sản Phẩm --}}
@@ -136,5 +137,10 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    ol {
+        margin: 0 !important;
+        padding: 10px 0 !important;
     }
 </style>
