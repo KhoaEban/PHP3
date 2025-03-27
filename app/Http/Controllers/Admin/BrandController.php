@@ -3,18 +3,28 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\Brand;
+
 
 class BrandController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // $brands = Brand::with('children')->whereNull('parent_id')->get();
-        $brands = Brand::with('parent')->get();
-        return view('admin.brands.index', compact('brands'));
+        $search = $request->input('search');
+
+        // Lấy danh sách thương hiệu cha (parent_id = null)
+        $brands = Brand::with('children')->whereNull('parent_id')
+            ->when($search, function ($query) use ($search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })->orderBy('created_at', 'desc')->paginate(10);
+
+        $parentBrands = Brand::whereNull('parent_id')->get(); // Lấy danh sách brand cha để hiển thị trong form thêm
+
+        return view('admin.brands.index', compact('brands', 'parentBrands'));
     }
+
 
     public function store(Request $request)
     {
