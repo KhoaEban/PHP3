@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 // Route Auth
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Auth\GoogleController;
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -69,8 +68,8 @@ Route::middleware(['check.role:admin'])->group(function () {
 // Route cho user
 Route::prefix('user')->group(function () {
     Route::get('/index', [UserController::class, 'index'])->name('user.index');
-    Route::get('/products', [ProductControllerUser::class , 'index'])->name('user.products');
-    Route::get('/products/{id}', [ProductControllerUser::class , 'show'])->name('user.products.show');
+    Route::get('/products', [ProductControllerUser::class, 'index'])->name('user.products');
+    Route::get('/products/{id}', [ProductControllerUser::class, 'show'])->name('user.products.show');
 
     // About lab1
     Route::get('/about', function () {
@@ -104,8 +103,8 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 // Google login
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
-Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
 // Hiển thị form đăng ký & đăng nhập
 Route::get('/register', function () {
@@ -129,4 +128,3 @@ Route::get('/password/reset', function () {
 Route::get('/404', function () {
     return view('errors');
 })->name('404');
-

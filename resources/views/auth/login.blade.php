@@ -95,8 +95,8 @@
                                 <p>Hoặc đăng nhập bằng</p>
                             </div>
                             <div class="text-center">
-                                <a href="{{ route('auth.google') }}" class="btn btn-danger">
-                                    <i class="fab fa-google"></i> Google
+                                <a href="{{ url('/auth/google') }}" class="btn btn-danger">
+                                    <i class="fab fa-google"></i> Đăng nhập với Google
                                 </a>
                             </div>
                         </div>
