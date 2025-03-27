@@ -89,6 +89,17 @@
                         <div class="mt-3 text-center">
                             <p>Chưa có tài khoản? <a href="{{ route('register.form') }}">Đăng ký ngay</a></p>
                         </div>
+
+                        <div class="bg-light">
+                            <div class="text-center">
+                                <p>Hoặc đăng nhập bằng</p>
+                            </div>
+                            <div class="text-center">
+                                <a href="{{ route('auth.google') }}" class="btn btn-danger">
+                                    <i class="fab fa-google"></i> Google
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

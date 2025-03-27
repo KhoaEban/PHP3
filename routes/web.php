@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+// Route Auth
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\GoogleController;
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -40,7 +42,7 @@ Route::middleware(['check.role:admin'])->group(function () {
     });
 
     // Route quản lý danh mục trong Admin
-    Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::prefix('admin')->group(function () {
         Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
         Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
         Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
@@ -96,6 +98,14 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 Route::post('/email', [AuthController::class, 'sendMail'])->name('send-mail')->middleware('auth');
+// Forgot password & Reset password
+Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+// Google login
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 // Hiển thị form đăng ký & đăng nhập
 Route::get('/register', function () {
@@ -120,7 +130,3 @@ Route::get('/404', function () {
     return view('errors');
 })->name('404');
 
-Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
