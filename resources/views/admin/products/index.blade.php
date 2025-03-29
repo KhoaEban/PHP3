@@ -106,11 +106,18 @@
                             <td>
                                 <input type="checkbox" />
                             </td>
-                            <td>
+                            <td class="d-flex align-items-center">
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
+                                    width="50">
+                                <p class="mx-2">
+                                    {{ $product->title }}
+                                </p>
+                            </td>
+                            {{-- <td>
 
                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
                                     width="50">
-                            </td>
+                            </td> --}}
                             {{-- <td>
                                 CP06
                             </td> --}}

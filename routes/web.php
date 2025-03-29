@@ -68,8 +68,13 @@ Route::middleware(['check.role:admin'])->group(function () {
 // Route cho user
 Route::prefix('user')->group(function () {
     Route::get('/index', [UserController::class, 'index'])->name('user.index');
-    Route::get('/products', [ProductControllerUser::class, 'index'])->name('user.products');
-    Route::get('/products/{id}', [ProductControllerUser::class, 'show'])->name('user.products.show');
+
+    Route::prefix('products')->group(function () {
+        Route::get('/', [ProductControllerUser::class, 'index'])->name('user.products');
+        Route::get('/{slug}', [ProductControllerUser::class, 'show'])->name('user.products.show');
+    });
+
+
 
     // About lab1
     Route::get('/about', function () {

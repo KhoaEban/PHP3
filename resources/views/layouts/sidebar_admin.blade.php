@@ -76,7 +76,15 @@
                             Tables
                         </a>
                     </div>
+                    <div class="sb-sidenav-menu-heading px-3 mt-5">
+                        {{-- Quay về trang chủ --}}
+                        <a class="nav-link d-flex align-items-center" href="{{ url('/') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
+                            Quay về trang chủ
+                        </a>
+                    </div>
                 </div>
+
                 <div class="sb-sidenav-footer">
                     <div class="small">Logged in as:</div>
                     Start Bootstrap

@@ -10,25 +10,16 @@ use Illuminate\Http\Request;
 
 class ProductControllerUser extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index(Request $request)
     {
         $query = Product::query();
+        $selectedCategory = null;
 
         // Lọc theo danh mục
         if ($request->has('category')) {
-            $category = Category::where('slug', $request->category)->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
+            $selectedCategory = Category::where('slug', $request->category)->first();
+            if ($selectedCategory) {
+                $query->where('category_id', $selectedCategory->id);
             }
         }
 
@@ -40,7 +31,6 @@ class ProductControllerUser extends Controller
             $query->where('price', '<=', (int) $request->max_price);
         }
 
-
         // Sắp xếp
         if ($request->sort == 'price_asc') {
             $query->orderBy('price', 'asc');
@@ -50,29 +40,29 @@ class ProductControllerUser extends Controller
             $query->latest();
         }
 
-        // request category
-        if ($request->has('category')) {
-            $category = Category::where('slug', $request->category)->first();
-            if ($category) {
-                $query->where('category_id', $category->id);
-            }
-        }
-
         $products = $query->paginate(12);
         $categories = Category::all();
 
-        return view('user.product', compact('products', 'categories'));
+        return view('user.products.product', compact('products', 'categories', 'selectedCategory'));
     }
 
 
-    public function show(Product $products)
+    public function show($slug)
     {
-        return view('user.product', compact('products'));
+        // Tìm sản phẩm theo slug
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        // Lấy tên danh mục của sản phẩm
+        $categoryName = $product->category ? $product->category->name : 'Chưa có danh mục';
+
+        // Lấy các sản phẩm liên quan có cùng danh mục
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->limit(4)
+            ->get();
+
+        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName'));
     }
-
-
-
-
 
 
 

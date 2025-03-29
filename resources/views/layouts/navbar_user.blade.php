@@ -21,7 +21,7 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     {{-- Font Awesome --}}
     <script src="https://kit.fontawesome.com/d70c32c211.js" crossorigin="anonymous"></script>
-    
+
     <!-- Favicons -->
     <link href="/img/favicon.png" rel="icon">
     <link href="/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -43,7 +43,7 @@
 
 <body>
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-        <div class="container">
+        <div class="container-fluid px-5">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="{{ __('Toggle navigation') }}">
@@ -52,8 +52,26 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav">
+                    <!-- Logo -->
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        <img width="150px" src="{{ asset('images/logo.webp') }}" alt="Slide 1">
+                    </a>
+                </ul>
 
+                <!-- Center Side Of Navbar -->
+                <ul class="navbar-nav mx-auto">
+                    {{-- Tìm kiếm --}}
+                    <li class="nav-item">
+                        <form method="GET" action="" class="search-form">
+                            <input class="form-control" name="search" type="search" placeholder="Tìm kiếm sản phẩm"
+                                aria-label="Search">
+                            <button class="search-icon" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </li>
+                    {{-- Trang chủ --}}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('/') }}">Trang chủ</a>
                     </li>
@@ -76,13 +94,6 @@
                             </button>
                         </form>
                     </li> --}}
-                </ul>
-
-                <!-- Center Side Of Navbar -->
-                <ul class="navbar-nav mx-auto gap-3">
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        <img src="{{ asset('images/logo.webp') }}" alt="Slide 1">
-                    </a>
                 </ul>
 
 
@@ -217,27 +228,27 @@
         border-radius: 25px;
         overflow: hidden;
         background: white;
-        border: 2px solid #ffffff;
+        border: 1px solid #000000;
         transition: all 0.3s ease-in-out;
+        margin: 0;
     }
 
     .navbar .search-form input {
         border: none;
-        padding: 8px 12px;
         outline: none;
-        width: 250px;
+        width: 500px;
     }
 
     .navbar .search-form:focus-within {
-        border-color: #ffffff;
-        box-shadow: 0px 0px 5px rgb(255, 255, 255);
+        border-color: #000000;
+        box-shadow: 0px 0px 5px rgb(0, 0, 0);
     }
 
     /* Icon tìm kiếm */
     .navbar .search-icon {
         background: #ffffff;
         padding: 8px 12px;
-        color: white;
+        color: rgb(0, 0, 0);
         border: none;
         cursor: pointer;
         transition: all 0.3s ease-in-out;
@@ -251,7 +262,6 @@
     .navbar .btn-search {
         background-color: #ffffff !important;
         border: none;
-        padding: 8px 12px;
         font-weight: 500;
         color: white;
         border-radius: 20px;
