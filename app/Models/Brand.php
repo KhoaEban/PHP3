@@ -11,6 +11,12 @@ class Brand extends Model
 
     protected $fillable = ['name', 'slug', 'parent_id', 'description', 'thumbnail'];
 
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_brands');
+    }
+
     public function parent()
     {
         return $this->belongsTo(Brand::class, 'parent_id');

@@ -11,7 +11,27 @@
         <div class="product-details">
             <!-- Hình ảnh sản phẩm -->
             <div class="product-image">
-                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}">
+                <div class="row">
+                    <div class="col-12">
+                        <img id="mainImage" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}">
+                    </div>
+                    <div class="col-12">
+                        <!-- Hình ảnh phụ -->
+                        @if ($product->images->isNotEmpty())
+                            <div class="product-thumbnails mt-3 mx-0">
+                                <div class="row">
+                                    @foreach ($product->images as $image)
+                                        <div class="col-3">
+                                            <img src="{{ asset('storage/' . $image->image) }}" width="100%"
+                                                class="thumbnail" alt="{{ $image->image }}"
+                                                onclick="changeImage('{{ asset('storage/' . $image->image) }}')">
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <!-- Thông tin sản phẩm -->
@@ -21,6 +41,9 @@
 
                 <!-- Hiển thị danh mục sản phẩm -->
                 <p><strong>Danh mục:</strong> {{ $categoryName }}</p>
+
+                <!-- Hiển thị thương hiệu -->
+                <p><strong>Tác giả:</strong> {{ $brandName }}</p>
 
                 <p>{{ $product->description }}</p>
 
@@ -43,7 +66,8 @@
                         <p id="quantityError" class="text-danger mt-2" style="display: none;">Số lượng không hợp lệ!</p>
                     </form>
                     <!-- Mua ngay -->
-                    <a href="#" style="border: 1px solid #4E4E4E" class="text-dark py-2 px-3 mt-5 mb-3 mx-3">Mua ngay</a>
+                    <a href="#" style="border: 1px solid #4E4E4E" class="text-dark py-2 px-3 mt-5 mb-3 mx-3">Mua
+                        ngay</a>
                 </div>
                 <!-- Hiển thị số lượng sản phẩm có sẵn -->
                 <p><strong>Số lượng có sẵn:</strong> {{ $product->stock }} sản phẩm</p>
@@ -84,7 +108,11 @@
         </div>
     </div>
 @endsection
-
+<script>
+    function changeImage(imageUrl) {
+        document.getElementById('mainImage').src = imageUrl;
+    }
+</script>
 <style>
     .product-details {
         display: flex;
@@ -101,6 +129,22 @@
         width: 100%;
         border-radius: 8px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-thumbnails {
+        display: flex;
+        gap: 10px;
+    }
+
+    .product-thumbnails img {
+        width: 100%;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 2px solid transparent;
+    }
+
+    .product-thumbnails img:hover {
+        border: 2px solid #007bff;
     }
 
     .product-info {

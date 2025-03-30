@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Brand;
+use App\Models\ProductImage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +19,7 @@ class ProductController extends Controller
             return redirect('404')->with('error', 'Bạn không có quyền truy cập!');
         }
 
-        $query = Product::with('category'); // Lấy thông tin danh mục kèm theo sản phẩm
+        $query = Product::with(['categories', 'brands']);
 
         if ($request->has('search') && !empty($request->search)) {
             $search = trim($request->search);
@@ -35,93 +37,95 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products'));
     }
 
-
-
     public function create()
     {
         $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        $brands = Brand::all();
+        return view('admin.products.create', compact('categories', 'brands'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'status' => 'required|boolean',
-            'image' => 'nullable|image|max:2048'
+            'category_ids' => 'required|array',
+            'brand_ids' => 'required|array',
+            'title' => 'required',
+            'price' => 'required|numeric',
+            'stock' => 'required|numeric',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $imagePath = $request->file('image') ? $request->file('image')->store('products', 'public') : null;
+        $imagePath = $request->file('image')->store('products', 'public');
 
-        Product::create([
+        $product = Product::create([
             'title' => $request->title,
-            'category_id' => $request->category_id,
-            'slug' => \Illuminate\Support\Str::slug($request->title),
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
             'status' => $request->status,
-            'image' => $imagePath
+            'image' => $imagePath,
         ]);
 
-        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm!');
-    }
+        $product->categories()->sync($request->category_ids);
+        $product->brands()->sync($request->brand_ids);
 
-    public function show(Product $product)
-    {
-        return view('admin.products.show', compact('product'));
-    }
-
-    public function edit($id)
-    {
-        $product = Product::where('id', $id)->firstOrFail(); // Tìm sản phẩm theo slug
-        $categories = Category::all();
-        return view('admin.products.edit', compact('product', 'categories'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'status' => 'required|boolean',
-            'image' => 'nullable|image|max:2048'
-        ]);
-
-        if ($request->hasFile('image')) {
-            Storage::delete('public/' . $product->image);
-            $imagePath = $request->file('image')->store('products', 'public');
-        } else {
-            $imagePath = $product->image;
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('products', 'public');
+                ProductImage::create(['product_id' => $product->id, 'image' => $path]);
+            }
         }
 
-        $product->update([
-            'title' => $request->title,
-            'category_id' => $request->category_id,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'status' => $request->status,
-            'image' => $imagePath
+        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm.');
+    }
+
+    public function edit(Product $product)
+    {
+        $categories = Category::all();
+        $brands = Brand::all();
+        return view('admin.products.edit', compact('product', 'categories', 'brands'));
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $request->validate([
+            'category_ids' => 'required|array',
+            'brand_ids' => 'required|array',
+            'title' => 'required',
+            'price' => 'required|numeric',
+            'stock' => 'required|numeric',
+            'image' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật!');
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+        $product->categories()->sync($request->category_ids);
+        $product->brands()->sync($request->brand_ids);
+
+        if ($request->hasFile('images')) {
+            ProductImage::where('product_id', $product->id)->delete();
+            foreach ($request->file('images') as $file) {
+                $path = $file->store('products', 'public');
+                ProductImage::create(['product_id' => $product->id, 'image' => $path]);
+            }
+        }
+
+        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật.');
     }
 
     public function destroy(Product $product)
     {
         Storage::delete('public/' . $product->image);
+        $product->categories()->detach();
+        $product->brands()->detach();
         $product->delete();
-
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã bị xóa!');
     }
 }

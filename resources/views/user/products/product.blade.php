@@ -8,18 +8,23 @@
         </div>
     </nav>
 
-
+    <h1 class="text-center fw-bold my-5">Danh sách sản phẩm</h1>
     <div class="container-fluid px-5 mt-4">
         <div class="row">
             {{-- Sidebar Lọc Sản Phẩm --}}
             <div class="col-md-3">
-                <h5 class="mb-3">DANH MỤC</h5>
+                <h5 class="mb-3 fw-bold">DANH MỤC</h5>
                 <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{{ route('user.products') }}" class="text-decoration-none {{ !request('category') }}">
+                            Tất cả
+                        </a>
+                    </li>
                     @foreach ($categories as $category)
                         @if ($category->parent_id === null)
-                            <li class="list-group-item fw-bold">
+                            <li class="list-group-item">
                                 <a href="{{ route('user.products', ['category' => $category->slug]) }}"
-                                    class="text-decoration-none {{ request('category') == $category->slug}}">
+                                    class="text-decoration-none {{ request('category') == $category->slug }}">
                                     {{ $category->name }}
                                 </a>
 
@@ -29,16 +34,16 @@
                                 @endphp
 
                                 @if ($subCategories->isNotEmpty())
-                                    <button class="btn btn-link p-0 ms-2" data-bs-toggle="collapse"
+                                    <button class="btn btn-link p-0 ms-2 text-dark" data-bs-toggle="collapse"
                                         data-bs-target="#category-{{ $category->id }}">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
 
                                     <ul class="list-group collapse ps-4" id="category-{{ $category->id }}">
                                         @foreach ($subCategories as $subCategory)
-                                            <li class="list-group-item">
+                                            <li class="list-group-item border-0 p-0 pt-2">
                                                 <a href="{{ route('user.products', ['category' => $subCategory->slug]) }}"
-                                                    class="text-decoration-none {{ request('category') == $subCategory->slug}}">
+                                                    class="text-decoration-none {{ request('category') == $subCategory->slug }}">
                                                     -- {{ $subCategory->name }}
                                                 </a>
                                             </li>
@@ -50,10 +55,49 @@
                     @endforeach
                 </ul>
 
+                <h5 class="mb-3 mt-4 fw-bold">TÁC GIẢ</h5>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{{ route('user.products') }}" class="text-decoration-none {{ !request('brand') }}">
+                            Tất cả
+                        </a>
+                    </li>
+                    @foreach ($brands as $brand)
+                        @if ($brand->parent_id === null)
+                            <li class="list-group-item">
+                                <a href="{{ route('user.products', ['brand' => $brand->slug]) }}"
+                                    class="text-decoration-none {{ request('brand') == $brand->slug }}">
+                                    {{ $brand->name }}
+                                </a>
 
+                                @php
+                                    $subBrands = $brands->where('parent_id', $brand->id);
+                                @endphp
+
+                                @if ($subBrands->isNotEmpty())
+                                    <button class="btn btn-link p-0 ms-2 text-dark" data-bs-toggle="collapse"
+                                        data-bs-target="#brand-{{ $brand->id }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+
+                                    <ul class="list-group collapse ps-4" id="brand-{{ $brand->id }}">
+                                        @foreach ($subBrands as $subBrand)
+                                            <li class="list-group-item border-0 p-0 pt-2">
+                                                <a href="{{ route('user.products', ['brand' => $subBrand->slug]) }}"
+                                                    class="text-decoration-none {{ request('brand') == $subBrand->slug }}">
+                                                    -- {{ $subBrand->name }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
 
                 {{-- Bộ lọc giá --}}
-                <h5 class="mt-4">LỌC THEO GIÁ</h5>
+                <h5 class="mt-4 fw-bold">LỌC THEO GIÁ</h5>
                 <div class="list-group border px-4 py-3">
                     <form method="GET" action="{{ route('user.products') }}" id="filter-form">
                         <input type="hidden" name="category" value="{{ request('category') }}">
@@ -117,10 +161,18 @@
                     <h2 class="mb-0">
                         @php
                             $selectedCategory = $categories->firstWhere('slug', request('category'));
+                            $selectedBrand = $brands->firstWhere('slug', request('brand'));
                         @endphp
 
-                        {{ $selectedCategory ? $selectedCategory->name : 'Tất cả sản phẩm' }}
+                        @if ($selectedCategory)
+                            {{ 'Danh mục: ' . $selectedCategory->name }}
+                        @elseif ($selectedBrand)
+                            {{ 'Tác giả: ' . $selectedBrand->name }}
+                        @else
+                            Tất cả sản phẩm
+                        @endif
                     </h2>
+
 
                     <form method="GET" action="{{ route('user.products') }}">
                         <input type="hidden" name="category" value="{{ request('category') }}">
@@ -128,7 +180,8 @@
                         <input type="hidden" name="max_price" value="{{ request('max_price') }}">
                         <select name="sort" class="form-select" onchange="this.form.submit()">
                             <option value="">Sắp xếp theo</option>
-                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá thấp → cao
+                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá thấp →
+                                cao
                             </option>
                             <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá cao →
                                 thấp</option>
@@ -139,9 +192,15 @@
 
                 {{-- Hiển thị sản phẩm --}}
                 <div class="row">
+                    @if (isset($query))
+                        <div class="col-12">
+                            <p class="text-muted">Kết quả tìm kiếm: "<span>{{ $query }}</span>"</p>
+                        </div>
+                    @endif
+
                     @if ($products->isEmpty())
                         <div class="col-12">
-                            <p class="text-danger text-center mt-3">Không có sản phẩm trong danh mục này.</p>
+                            <p class="text-danger text-center mt-3">Không tìm thấy sản phẩm nào.</p>
                         </div>
                     @else
                         @foreach ($products as $product)
@@ -150,15 +209,22 @@
                                     <a href="{{ route('user.products.show', $product->slug) }}"
                                         class="text-decoration-none text-dark">
                                         <div class="card-img">
-                                            <img src="{{ asset('storage/' . $product->image) }}" class="card-img-top"
-                                                alt="{{ $product->title }}">
+                                            <img class="card-img-top lazyload"
+                                                src="{{ asset('storage/' . $product->image) }}"
+                                                alt="{{ $product->title }}" loading="lazy">
                                         </div>
                                         <div class="card-body text-center">
                                             <h6 class="card-title">{{ $product->title }}</h6>
-                                            <p class="text-danger fw-bold">
-                                                {{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
+                                            <p class="text-danger text-start fw-bold">
+                                                {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                            </p>
                                         </div>
                                     </a>
+                                    @if ($brands->contains('id', $product->brand_id))
+                                        <p style="font-size: 14px" class="text-muted text-start px-3 fst-italic">Tác giả:
+                                            <span>{{ $brands->firstWhere('id', $product->brand_id)->name }}</span>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -178,9 +244,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    {{-- Lazyload --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -248,7 +313,9 @@
 @endsection
 <style>
     ol {
-        background-color: #f8f9fa00 !important;
+        background-color: #d2d5d800 !important;
+        margin: 0 !important;
+        padding: 10px 0 !important;
     }
 
     .image-breadcrumb {
@@ -285,24 +352,39 @@
         text-align: center;
     }
 
+    .breadcrumb-item {
+        color: #b3b1b1 !important;
+    }
+
     .breadcrumb-item a {
         color: white !important;
     }
 
-    .card-img {
-        height: 200px;
-        overflow: hidden;
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     }
 
     .card-img img {
         width: 100%;
-        height: 100%;
+        height: 200px;
         object-fit: cover;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
     }
 
-    ol {
-        margin: 0 !important;
-        padding: 10px 0 !important;
+    .card-body h6 {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .card-body p {
+        font-size: 14px;
+        color: #dc3545;
     }
 
     /* Thêm hiệu ứng hover cho các mục danh mục */
@@ -343,5 +425,13 @@
     button,
     input:focus {
         outline: none;
+    }
+
+    button .fa-chevron-right {
+        transition: transform 0.3s;
+    }
+
+    button[aria-expanded="true"] .fa-chevron-right {
+        transform: rotate(90deg);
     }
 </style>

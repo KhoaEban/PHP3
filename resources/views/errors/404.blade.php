@@ -4,20 +4,15 @@
     <div class="container">
         <h1>ERROR 404</h1>
         <p>Page not found</p>
-        <a href="/">Return to Home</a>
+        <a class="return" href="/">Return to Home</a>
     </div>
     <style>
         body {
             text-align: center;
-            background-color: #000000;
-            color: #ffffff;
         }
 
         .container {
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
-            margin: 0 auto;
+            margin-top: 100px;
         }
 
         h1 {
@@ -30,13 +25,16 @@
             margin-bottom: 30px;
         }
 
-        a {
+        .return {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
             text-decoration: none;
-            border-radius: 5px;
+            border: 1px solid #000;
+        }
+
+        .return:hover {
+            background-color: #000;
+            color: #fff;
         }
     </style>
 @endsection

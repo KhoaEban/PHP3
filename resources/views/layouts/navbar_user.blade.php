@@ -62,8 +62,8 @@
                 <!-- Center Side Of Navbar -->
                 <ul class="navbar-nav mx-auto">
                     {{-- Tìm kiếm --}}
-                    <li class="nav-item">
-                        <form method="GET" action="" class="search-form">
+                    <li class="nav-item me-5">
+                        <form method="GET" action="{{ route('user.products.search') }}" class="search-form">
                             <input class="form-control" name="search" type="search" placeholder="Tìm kiếm sản phẩm"
                                 aria-label="Search">
                             <button class="search-icon" type="submit">

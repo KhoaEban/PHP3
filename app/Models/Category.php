@@ -12,6 +12,13 @@ class Category extends Model
 
     protected $fillable = ['name', 'slug', 'description', 'image', 'parent_id'];
 
+    
+    public function products()
+    {
+        // return $this->hasMany(Product::class);
+        return $this->belongsToMany(Product::class, 'product_categories');
+    }
+    
     // thêm quan hệ cha - con
     public function parent()
     {
@@ -22,12 +29,7 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
-
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
-
+    
     // Tạo slug tự động khi tạo danh mục
     protected static function boot()
     {

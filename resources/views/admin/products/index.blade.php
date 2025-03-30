@@ -85,15 +85,15 @@
                             Danh mục
                         </th>
                         <th>
-                            Ngày tạo
-                            <i class="fas fa-sort">
-                            </i>
+                            Thương hiệu
                         </th>
                         <th>
                             Trạng thái
                         </th>
                         <th>
-                            Thương hiệu
+                            Ngày tạo
+                            <i class="fas fa-sort">
+                            </i>
                         </th>
                         <th>
                             Thao tác
@@ -109,41 +109,43 @@
                             <td class="d-flex align-items-center">
                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
                                     width="50">
-                                <p class="mx-2">
+                                <p class="text-dark mx-2">
                                     {{ $product->title }}
                                 </p>
                             </td>
-                            {{-- <td>
-
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
-                                    width="50">
-                            </td> --}}
-                            {{-- <td>
-                                CP06
-                            </td> --}}
                             <td class="status-in-stock">
-                                In stock ({{ $product->stock }})
+                                Còn hàng ({{ $product->stock }})
                             </td>
                             <td>
                                 {{-- 30.000 VND – 35.000 VND --}}
                                 {{ number_format($product->price, 0, ',', '.') }} VND
                             </td>
                             <td>
-                                {{-- Bánh miếng nhỏ, Uncategorized --}}
-                                {{ $product->category->name ?? 'Không có danh mục' }}
+                                @if ($product->categories->isNotEmpty())
+                                    <span
+                                        class="badge text-muted text-wrap m-0 p-0">{{ $product->categories->pluck('name')->implode(', ') }}</span>
+                                @else
+                                    <span class="badge text-muted text-wrap m-0 p-0">Không có danh mục</span>
+                                @endif
                             </td>
                             <td>
-                                Published
-                                <br />
-                                {{ $product->created_at->format('d/m/Y') }}
+                                @if ($product->brands->isNotEmpty())
+                                    <span
+                                        class="badge text-muted text-wrap m-0 p-0">{{ $product->brands->pluck('name')->implode(', ') }}</span>
+                                @else
+                                    <span class="badge text-muted text-wrap m-0 p-0">Không có thương hiệu</span>
+                                @endif
                             </td>
+
                             <td>
                                 <span class="badge {{ $product->status ? 'bg-success' : 'bg-danger' }}">
                                     {{ $product->status ? 'Hiển thị' : 'Ẩn' }}
                                 </span>
                             </td>
-                            <td class="brands">
-                                {{ $product->brand->name ?? 'Không có thương hiệu' }}
+                            <td>
+                                <span class="badge text-muted text-wrap m-0 p-0 mb-1">Đã xuất bản</span>
+                                <br />
+                                <span class="badge text-muted text-wrap m-0 p-0">{{ $product->created_at->format('d/m/Y') }}</span>
                             </td>
                             <td class="action">
                                 <a href="{{ route('products.edit', $product->id) }}"

@@ -4,9 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Models\Brand;
 
 class ProductControllerUser extends Controller
 {
@@ -14,12 +15,25 @@ class ProductControllerUser extends Controller
     {
         $query = Product::query();
         $selectedCategory = null;
+        $selectedBrand = null;
 
         // Lọc theo danh mục
         if ($request->has('category')) {
             $selectedCategory = Category::where('slug', $request->category)->first();
             if ($selectedCategory) {
-                $query->where('category_id', $selectedCategory->id);
+                $query->whereHas('categories', function ($q) use ($selectedCategory) {
+                    $q->where('categories.id', $selectedCategory->id);
+                });
+            }
+        }
+
+        // Lọc theo thương hiệu
+        if ($request->has('brand')) {
+            $selectedBrand = Brand::where('slug', $request->brand)->first();
+            if ($selectedBrand) {
+                $query->whereHas('brands', function ($q) use ($selectedBrand) {
+                    $q->where('brands.id', $selectedBrand->id);
+                });
             }
         }
 
@@ -42,30 +56,52 @@ class ProductControllerUser extends Controller
 
         $products = $query->paginate(12);
         $categories = Category::all();
+        $brands = Brand::all();
 
-        return view('user.products.product', compact('products', 'categories', 'selectedCategory'));
+        return view('user.products.product', compact('products', 'categories', 'brands', 'selectedCategory', 'selectedBrand'));
     }
-
 
     public function show($slug)
     {
         // Tìm sản phẩm theo slug
         $product = Product::where('slug', $slug)->firstOrFail();
 
-        // Lấy tên danh mục của sản phẩm
-        $categoryName = $product->category ? $product->category->name : 'Chưa có danh mục';
+        // Lấy danh mục đầu tiên của sản phẩm (nếu có)
+        $category = $product->categories()->first();
+        $brand = $product->brands()->first();
+        $categoryName = $category ? $category->name : 'Chưa có danh mục';
+        $brandName = $brand ? $brand->name : 'Chưa có tác giả';
 
-        // Lấy các sản phẩm liên quan có cùng danh mục
-        $relatedProducts = Product::where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->limit(4)
-            ->get();
+        // Lấy các sản phẩm liên quan cùng danh mục
+        $relatedProducts = collect(); // Mặc định là rỗng nếu không có danh mục
+        if ($category) {
+            $relatedProducts = Product::whereHas('categories', function ($query) use ($category) {
+                $query->where('categories.id', $category->id);
+            })
+                ->where('id', '!=', $product->id)
+                ->limit(4)
+                ->get();
+        }
 
-        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName'));
+        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName'));
     }
 
 
+    public function search(Request $request)
+    {
+        $query = $request->input('search');
 
+        if (!$query) {
+            return redirect()->route('user.products')->with('error', 'Vui lòng nhập từ khóa.');
+        }
+
+        $categories = Category::all(); // Truyền danh mục vào view
+        $products = Product::where('title', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->paginate(12);
+
+        return view('user.products.product', compact('products', 'categories', 'query'));
+    }
 
 
     public function boot()

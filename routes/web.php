@@ -73,7 +73,8 @@ Route::prefix('user')->group(function () {
         Route::get('/', [ProductControllerUser::class, 'index'])->name('user.products');
         Route::get('/{slug}', [ProductControllerUser::class, 'show'])->name('user.products.show');
     });
-
+    // Tìm kiếm sản phẩm
+    Route::get('/search', [ProductControllerUser::class, 'search'])->name('user.products.search');
 
 
     // About lab1
