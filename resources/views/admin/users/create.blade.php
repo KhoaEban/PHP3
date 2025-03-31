@@ -35,7 +35,7 @@
                     <div class="col-6">
                         <label class="form-label">Vai trò</label>
                         <select name="role" class="form-control">
-                            <option value="customer">Khách hàng</option>
+                            <option value="user">Người dùng</option>
                             <option value="admin">Quản trị viên</option>
                         </select>
                     </div>

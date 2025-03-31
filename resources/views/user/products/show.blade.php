@@ -55,14 +55,12 @@
                     <p><strong>Tác giả:</strong> <span>{!! implode('<br>', $brandNames->toArray()) !!}</span></p>
                 @endif
 
-                <p>{{ $product->description }}</p>
-
                 @if ($product->stock < 10)
                     <p class="text-warning fw-bold">⚠ Chỉ còn {{ $product->stock }} sản phẩm trong kho!</p>
                 @endif
 
                 <div class="d-flex align-items-end">
-                    <form action="#" method="POST" id="addToCartForm">
+                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="addToCartForm">
                         @csrf
                         <div class="quantity-input mb-3 mt-5">
                             <label for="quantity" class="fw-bold">Số lượng:</label>
@@ -96,10 +94,10 @@
         <!-- Nội dung của từng tab -->
         <div class="tab-content">
             <div id="tab-description" class="tab-pane active">
-                <p>Đây là phần mô tả sản phẩm...</p>
+                <p>{{ $product->description }}</p>
             </div>
             <div id="tab-additional_information" class="tab-pane">
-                <p>Thông tin bổ sung về sản phẩm...</p>
+                <p>{{ $product->additional_information }}</p>
             </div>
             <div id="tab-reviews" class="tab-pane">
                 <p>Hiện chưa có đánh giá nào.</p>

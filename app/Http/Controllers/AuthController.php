@@ -90,16 +90,26 @@ class AuthController extends Controller
 
             $googleUser = $this->provider->getResourceOwner($token);
 
-            $user = User::updateOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
+            // Kiểm tra xem người dùng có trong hệ thống chưa
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                // Nếu người dùng chưa tồn tại, tạo mới
+                $user = User::create([
                     'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
-                    'password' => bcrypt(str()->random(16)), // Không cần thiết vì dùng Google
-                ]
-            );
+                    'password' => bcrypt(str()->random(16)), // Mật khẩu ngẫu nhiên
+                ]);
+            } elseif (!$user->google_id) {
+                // Nếu tài khoản đã có mà chưa có google_id, cập nhật google_id
+                $user->update([
+                    'google_id' => $googleUser->getId(),
+                ]);
+            }
 
+            // Đăng nhập vào hệ thống
             Auth::login($user);
 
             if (Auth::user()->role === 'admin') {
@@ -111,6 +121,7 @@ class AuthController extends Controller
             return redirect('/login')->with('error', 'Đăng nhập Google thất bại.');
         }
     }
+
 
     // Đăng xuất
     public function logout()

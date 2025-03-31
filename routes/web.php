@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\CustomersControllerAdmin;
 // Route cho user
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\ProductControllerUser;
+use App\Http\Controllers\User\CartController;
 
 // Route::get('/admin/dashboard', function () {
 //     return view('admin.dashboard');
@@ -84,7 +85,19 @@ Route::prefix('user')->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductControllerUser::class, 'index'])->name('user.products');
         Route::get('/{slug}', [ProductControllerUser::class, 'show'])->name('user.products.show');
+        Route::post('/product/{productId}/add-to-cart', [CartController::class, 'addToCart'])->name('cart.add');
     });
+
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'showCart'])->name('cart.show');
+        Route::get('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+    });
+
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [UserController::class, 'profile'])->name('user.profile');
+        Route::get('/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
+    });
+
     // Tìm kiếm sản phẩm
     Route::get('/search', [ProductControllerUser::class, 'search'])->name('user.products.search');
 

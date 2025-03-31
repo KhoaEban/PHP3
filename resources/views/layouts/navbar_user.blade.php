@@ -140,7 +140,7 @@
                                 @if (Auth::user()->role == 'admin')
                                     <a class="dropdown-item" href="{{ route('admin.dashboard') }}">Quản trị</a>
                                 @endif
-                                <a class="dropdown-item" href="#">Hồ sơ</a>
+                                <a class="dropdown-item" href="{{ route('user.profile') }}">Hồ sơ</a>
 
                                 <a class="dropdown-item" href="{{ route('logout') }}"
                                     onclick="event.preventDefault();

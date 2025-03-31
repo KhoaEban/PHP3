@@ -96,11 +96,12 @@ class ProductControllerUser extends Controller
         }
 
         $categories = Category::all(); // Truyền danh mục vào view
+        $brands = Brand::all();
         $products = Product::where('title', 'LIKE', "%{$query}%")
             ->orWhere('description', 'LIKE', "%{$query}%")
             ->paginate(12);
 
-        return view('user.products.product', compact('products', 'categories', 'query'));
+        return view('user.products.product', compact('products', 'categories', 'brands', 'query'));
     }
 
 
