@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CustomersControllerAdmin;
+
 // Route cho user
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\ProductControllerUser;
@@ -62,6 +64,16 @@ Route::middleware(['check.role:admin'])->group(function () {
         Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
         Route::put('/brands/update/{id}', [BrandController::class, 'update'])->name('brands.update');
         Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
+    });
+
+    // Route quản lý người dùng trong Admin
+    Route::prefix('admin')->group(function () {
+        Route::get('/customers', [CustomersControllerAdmin::class, 'index'])->name('customers.index');
+        Route::get('/customers/create', [CustomersControllerAdmin::class, 'create'])->name('customers.create');
+        Route::post('/customers', [CustomersControllerAdmin::class, 'store'])->name('customers.store');
+        Route::get('/customers/edit/{id}', [CustomersControllerAdmin::class, 'edit'])->name('customers.edit');
+        Route::put('/customers/update/{id}', [CustomersControllerAdmin::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{id}', [CustomersControllerAdmin::class, 'destroy'])->name('customers.destroy');
     });
 });
 

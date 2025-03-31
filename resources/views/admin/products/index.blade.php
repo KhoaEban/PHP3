@@ -11,12 +11,6 @@
                         Thêm sản phẩm
                     </button>
                 </a>
-                {{-- <button>
-                    Import
-                </button>
-                <button>
-                    Export
-                </button> --}}
             </div>
         </div>
         <div class="filters">
@@ -45,12 +39,11 @@
             </div>
             <div class="">
                 {{-- Thanh tìm kiếm sản phẩm --}}
-                <form method="GET" action="{{ route('products.index') }}"
-                    class="search-form d-flex align-items-center m-0 border px-3" style="width: 500px;">
-                    <input class="p-2 border-0" style="outline: none; width: 100%;" name="search" type="search"
+                <form method="GET" action="{{ route('products.index') }}" class="search-form d-flex border px-3"
+                    style="width: 500px;">
+                    <input class="p-2 border-0 w-100" style="outline: none;" name="search" type="search"
                         placeholder="Tìm kiếm sản phẩm" aria-label="Search" value="{{ request('search') }}">
-                    <button class="search-icon m-0 p-2 border-0 bg-transparent text-muted" style="outline: none;"
-                        type="submit">
+                    <button class="btn bg-transparent text-muted border-0" style="outline: none;" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
                 </form>
@@ -68,11 +61,6 @@
                             <i class="fas fa-sort">
                             </i>
                         </th>
-                        {{-- <th>
-                            SKU
-                            <i class="fas fa-sort">
-                            </i>
-                        </th> --}}
                         <th>
                             Số lượng
                         </th>
@@ -145,7 +133,8 @@
                             <td>
                                 <span class="badge text-muted text-wrap m-0 p-0 mb-1">Đã xuất bản</span>
                                 <br />
-                                <span class="badge text-muted text-wrap m-0 p-0">{{ $product->created_at->format('d/m/Y') }}</span>
+                                <span
+                                    class="badge text-muted text-wrap m-0 p-0">{{ $product->created_at->format('d/m/Y') }}</span>
                             </td>
                             <td class="action">
                                 <a href="{{ route('products.edit', $product->id) }}"
@@ -179,6 +168,25 @@
         </div>
     </div>
 @endsection
+<style>
+    input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+    .search-form {
+        border-radius: 5px;
+        background: white;
+    }
+
+    .search-form input {
+        border: none;
+    }
+
+    .search-form button {
+        cursor: pointer;
+    }
+</style>
 
 
 <script>

@@ -214,16 +214,25 @@
                                                 alt="{{ $product->title }}" loading="lazy">
                                         </div>
                                         <div class="card-body text-center">
-                                            <h6 class="card-title">{{ $product->title }}</h6>
-                                            <p class="text-danger text-start fw-bold">
+                                            <h6 class="card-title text-start">{{ $product->title }}</h6>
+                                            <p class="text-danger text-start">
                                                 {{ number_format($product->price, 0, ',', '.') }} VNĐ
                                             </p>
                                         </div>
                                     </a>
-                                    @if ($brands->contains('id', $product->brand_id))
-                                        <p style="font-size: 14px" class="text-muted text-start px-3 fst-italic">Tác giả:
-                                            <span>{{ $brands->firstWhere('id', $product->brand_id)->name }}</span>
-                                        </p>
+                                    @if ($product->brands->isNotEmpty())
+                                        <div class="card-footer text-muted text-center">
+                                            @php
+                                                $parentBrands = $product->brands->whereNull('parent_id')->unique();
+                                            @endphp
+
+                                            @foreach ($parentBrands as $brand)
+                                                {{ $brand->name }}
+                                                @if (!$loop->last)
+                                                    ,
+                                                @endif
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </div>
                             </div>
