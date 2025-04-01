@@ -100,6 +100,7 @@ Route::prefix('user')->group(function () {
     Route::prefix('profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
         Route::get('/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
+        Route::post('/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     });
 
     // Tìm kiếm sản phẩm

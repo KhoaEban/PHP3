@@ -34,4 +34,17 @@ class UserController extends Controller
 
         return view('user.profile.edit', compact('user'));
     }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = Auth::user();
+        $user->name = $request->name;
+        $user->save();
+
+        return redirect()->route('user.profile')->with('success', 'Cập nhật thành công');
+    }
 }
