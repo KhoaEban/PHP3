@@ -7,13 +7,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Category;
 
 class UserController extends Controller
 {
     public function index()
     {
-        return view('user.index');
+        $categories = Category::all();
+        return view('user.index', compact('categories'));
     }
+
 
     public function profile()
     {

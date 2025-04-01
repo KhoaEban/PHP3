@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="card-title mt-3" style="background-color: #B0C4DE">
-        <h1 class="h6 p-3">Quản lý tác giả</h1>
+        <h1 class="h6 p-3">Quản lý thương hiệu</h1>
     </div>
 
     <div class="container-fluid mt-4">
@@ -10,11 +10,11 @@
             {{-- Cột trái: Form thêm thương hiệu --}}
             <div class="col-md-4">
                 <div class="border p-3">
-                    <h5 class="mb-3">Thêm tác giả</h5>
+                    <h5 class="mb-3">Thêm thương hiệu</h5>
                     <form action="{{ route('brands.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-3">
-                            <label for="name" class="form-label">Tên tác giả</label>
+                            <label for="name" class="form-label">Tên thương hiệu</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="mb-3">

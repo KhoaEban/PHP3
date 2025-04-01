@@ -101,10 +101,12 @@
                 <ul class="navbar-nav ms-auto">
                     {{-- Giỏ hàng --}}
                     <li class="nav-item">
-                        <a class="nav-link" href="#" style="position: relative;">
+                        <a class="nav-link" href="{{ route('cart.show') }}" style="position: relative;">
                             <div class="discount-icon text-center text-white d-flex justify-content-center align-items-center"
                                 style="position: absolute; top: 0px; right: 0px; background-color: red; width: 20px; height: 20px; border-radius: 50%;">
-                                <span class="discount-number">0</span>
+                                <span class="discount-number">
+                                    {{ $totalItems  }}
+                                </span>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                 style="width: 30px; height: 30px;">

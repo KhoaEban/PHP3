@@ -94,7 +94,16 @@ class BrandController extends Controller
     public function destroy($id)
     {
         $brand = Brand::findOrFail($id);
+
+        // Chuyển tất cả danh mục con về danh mục gốc (không có cha)
+        Brand::where('parent_id', $id)->update(['parent_id' => null]);
+
+        // Xóa ảnh nếu có
+        if ($brand->thumbnail && file_exists(public_path('uploads/brands/' . $brand->thumbnail))) {
+            unlink(public_path('uploads/brands/' . $brand->thumbnail));
+        }
+
         $brand->delete();
-        return redirect()->route('brands.index')->with('success', 'Brand deleted successfully.');
+        return redirect()->route('brands.index')->with('success', 'Thương hiệu đã được xóa, các danh mục con đã được chuyển thành danh mục gốc.');
     }
 }

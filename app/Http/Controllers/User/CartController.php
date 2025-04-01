@@ -10,10 +10,21 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class CartController extends Controller
 {
+    public function index()
+    {
+        $carts = Cart::where('user_id', Auth::id())->get();
 
+        // Số lượng sản phẩm trong giỏ hàng
+        $totalItems = $carts->sum(function ($cart) {
+            return $cart->items->sum('quantity'); // Tính tổng số lượng từng sản phẩm
+        });
+
+        return view('user.cart.show', compact('carts', 'totalItems'));
+    }
 
     // Thêm sản phẩm vào giỏ hàng
     public function addToCart(Request $request, $productId)
