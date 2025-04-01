@@ -65,6 +65,8 @@ Route::middleware(['check.role:admin'])->group(function () {
         Route::get('/brands/edit/{id}', [BrandController::class, 'edit'])->name('brands.edit');
         Route::put('/brands/update/{id}', [BrandController::class, 'update'])->name('brands.update');
         Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
+        Route::put('/brands/{id}/remove-parent', [BrandController::class, 'removeParent'])->name('brands.removeParent');
+        Route::get('/brands/create-sub/{parent_id}', [BrandController::class, 'createSubbrand'])->name('brands.create.subbrand');
     });
 
     // Route quản lý người dùng trong Admin
@@ -91,6 +93,7 @@ Route::prefix('user')->group(function () {
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'showCart'])->name('cart.show');
         Route::get('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+        Route::post('/update', [CartController::class, 'updateCart'])->name('cart.update');
     });
 
     Route::prefix('profile')->group(function () {

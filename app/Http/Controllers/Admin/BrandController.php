@@ -90,20 +90,36 @@ class BrandController extends Controller
         return redirect()->route('brands.index')->with('success', 'Brand updated successfully.');
     }
 
+    public function createSubbrand($parent_id)
+    {
+        $parent = Brand::findOrFail($parent_id);
+        $brands = Brand::whereNull('parent_id')->get(); // Lấy danh mục cha
+
+        return view('admin.brands.create_subbrand', compact('parent', 'brands'));
+    }
+
+    public function removeParent($id)
+    {
+        $brand = Brand::findOrFail($id);
+        $brand->parent_id = null; // Bỏ danh mục cha
+        $brand->save();
+
+        return redirect()->route('brands.index')->with('success', 'Đã bỏ danh mục cha thành công!');
+    }
 
     public function destroy($id)
     {
         $brand = Brand::findOrFail($id);
 
-        // Chuyển tất cả danh mục con về danh mục gốc (không có cha)
-        Brand::where('parent_id', $id)->update(['parent_id' => null]);
-
-        // Xóa ảnh nếu có
-        if ($brand->thumbnail && file_exists(public_path('uploads/brands/' . $brand->thumbnail))) {
-            unlink(public_path('uploads/brands/' . $brand->thumbnail));
+        // Kiểm tra xem thương hiệu có thương hiệu con không
+        if ($brand->children()->exists()) {
+            // Cập nhật tất cả thương hiệu con thành thương hiệu gốc (parent_id = null)
+            $brand->children()->update(['parent_id' => null]);
         }
 
+        // Xóa thương hiệu
         $brand->delete();
-        return redirect()->route('brands.index')->with('success', 'Thương hiệu đã được xóa, các danh mục con đã được chuyển thành danh mục gốc.');
+
+        return redirect()->route('brands.index')->with('success', 'Thương hiệu đã được xóa! Các thương hiệu con đã trở thành thương hiệu độc lập.');
     }
 }

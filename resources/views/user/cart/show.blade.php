@@ -1,7 +1,7 @@
 @extends('layouts.navbar_user')
 
 @section('content')
-    <div class="container-fluid mt-4">
+    <div class="container mt-4">
         <div class="promo-code">
             <label for="promo-code">
                 Nhập mã khuyến mại
@@ -39,6 +39,33 @@
                                     <td colspan="5">Giỏ hàng của bạn hiện đang trống.</td>
                                 </tr>
                             @else
+                                {{-- @foreach ($cart->items as $item)
+                                    <tr>
+                                        <td class="item-details">
+                                            <img alt="{{ $item->product->title }}" height="50"
+                                                src="{{ asset('storage/' . $item->product->image) }}" width="50" />
+                                            <div class="mx-2">
+                                                <div style="font-weight: bold;">
+                                                    {{ $item->quantity }} x {{ $item->product->title }}
+                                                </div>
+                                                <div style="color: #666;">
+                                                    Mã sản phẩm: {{ $item->product->id }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input class="update-quantity" type="number" value="{{ $item->quantity }}"
+                                                min="1" data-item-id="{{ $item->id }}"
+                                                style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;">
+                                        </td>
+                                        <td>{{ number_format($item->product->price, 0, ',', '.') }} VNĐ</td>
+                                        <td>{{ number_format($item->quantity * $item->product->price, 0, ',', '.') }} VNĐ
+                                        </td>
+                                        <td class="remove">
+                                            <a href="{{ route('cart.remove', $item->id) }}" style="color: red;">X</a>
+                                        </td>
+                                    </tr>
+                                @endforeach --}}
                                 @foreach ($cart->items as $item)
                                     <tr>
                                         <td class="item-details">
@@ -57,9 +84,9 @@
                                             {{ number_format($item->product->price, 0, ',', '.') }} VNĐ
                                         </td>
                                         <td>
-                                            <input
-                                                style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;"
-                                                type="number" value="{{ $item->quantity }}" min="1" />
+                                            <input class="update-quantity" type="number" value="{{ $item->quantity }}"
+                                                min="1" data-item-id="{{ $item->id }}"
+                                                style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;">
                                         </td>
                                         <td>
                                             {{ number_format($item->quantity * $item->product->price, 0, ',', '.') }} VNĐ
@@ -99,6 +126,44 @@
         </div>
     </div>
 @endsection
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".update-quantity").forEach(input => {
+            input.addEventListener("change", function() {
+                let itemId = this.dataset.itemId;
+                let quantity = this.value;
+
+                if (quantity < 1) {
+                    this.value = 1; // Ngăn nhập số âm
+                    quantity = 1;
+                }
+
+                fetch("{{ route('cart.update') }}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            item_id: itemId,
+                            quantity: quantity
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload(); // Tải lại trang để cập nhật giá tiền
+                        } else {
+                            alert("Lỗi: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error("Lỗi:", error));
+            });
+        });
+    });
+</script>
 
 
 <style>

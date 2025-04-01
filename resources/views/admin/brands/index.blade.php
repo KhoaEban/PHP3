@@ -63,13 +63,14 @@
                                         <div class="d-flex align-items-center">
                                             @if ($brand->thumbnail)
                                                 <img src="{{ asset('uploads/brands/' . $brand->thumbnail) }}"
-                                                    alt="{{ $brand->name }}" width="40" height="40" class="me-2 rounded">
+                                                    alt="{{ $brand->name }}" width="40" height="40"
+                                                    class="me-2 rounded">
                                             @endif
                                             {{ $brand->name }}
                                         </div>
                                         <div>
                                             {{-- Thêm thương hiệu con --}}
-                                            <a href="#" class="btn-sm">
+                                            <a href="{{ route('brands.create.subbrand', $brand->id) }}" class="btn-sm">
                                                 <i class="fas fa-plus"></i> Thêm con
                                             </a>
                                             {{-- Sửa thương hiệu --}}
@@ -109,8 +110,8 @@
                                                     <a href="{{ route('brands.edit', $sub->id) }}" class="btn-sm">
                                                         <i class="fas fa-edit"></i> Sửa
                                                     </a>
-                                                    {{-- Xóa thương hiệu con --}}
-                                                    <form action="#"
+                                                    {{-- Xóa danh mục con --}}
+                                                    <form action="{{ route('brands.removeParent', $sub->id) }}"
                                                         method="POST" class="d-inline">
                                                         @csrf
                                                         @method('PUT')
@@ -151,6 +152,32 @@
                 Swal.fire({
                     title: "Bạn có chắc chắn muốn xóa?",
                     text: "Thao tác này không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Xác nhận xóa danh mục
+        document.querySelectorAll(".btn-delete").forEach(button => {
+            button.addEventListener("click", function() {
+                let form = this.closest("form");
+
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn xóa?",
+                    text: "Danh mục con sẽ được chuyển thành danh mục độc lập!",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#d33",
