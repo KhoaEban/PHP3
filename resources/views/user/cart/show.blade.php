@@ -2,12 +2,13 @@
 
 @section('content')
     <div class="container mt-4">
+        <h1 class="text-center fw-bold">Giỏ hàng</h1>
         <div class="promo-code">
             <label for="promo-code">
                 Nhập mã khuyến mại
             </label>
             <div style="display: flex;">
-                <input id="promo-code" placeholder="" type="text" />
+                <input id="promo-code" placeholder="Nhận mã khuyến mãi..." type="text" />
                 <button>
                     Áp dụng
                 </button>
@@ -17,7 +18,7 @@
             <div class="col-8">
                 <div style="overflow-x: auto;">
                     <table>
-                        <thead>
+                        <thead class="text-center">
                             <tr>
                                 <th>
                                     Mục
@@ -36,36 +37,9 @@
                         <tbody>
                             @if ($cart->items->isEmpty())
                                 <tr>
-                                    <td colspan="5">Giỏ hàng của bạn hiện đang trống.</td>
+                                    <td colspan="5" class="text-center text-danger fw-bold">Giỏ hàng của bạn hiện đang trống.</td>
                                 </tr>
                             @else
-                                {{-- @foreach ($cart->items as $item)
-                                    <tr>
-                                        <td class="item-details">
-                                            <img alt="{{ $item->product->title }}" height="50"
-                                                src="{{ asset('storage/' . $item->product->image) }}" width="50" />
-                                            <div class="mx-2">
-                                                <div style="font-weight: bold;">
-                                                    {{ $item->quantity }} x {{ $item->product->title }}
-                                                </div>
-                                                <div style="color: #666;">
-                                                    Mã sản phẩm: {{ $item->product->id }}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input class="update-quantity" type="number" value="{{ $item->quantity }}"
-                                                min="1" data-item-id="{{ $item->id }}"
-                                                style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;">
-                                        </td>
-                                        <td>{{ number_format($item->product->price, 0, ',', '.') }} VNĐ</td>
-                                        <td>{{ number_format($item->quantity * $item->product->price, 0, ',', '.') }} VNĐ
-                                        </td>
-                                        <td class="remove">
-                                            <a href="{{ route('cart.remove', $item->id) }}" style="color: red;">X</a>
-                                        </td>
-                                    </tr>
-                                @endforeach --}}
                                 @foreach ($cart->items as $item)
                                     <tr>
                                         <td class="item-details">
@@ -84,7 +58,7 @@
                                             {{ number_format($item->product->price, 0, ',', '.') }} VNĐ
                                         </td>
                                         <td>
-                                            <input class="update-quantity" type="number" value="{{ $item->quantity }}"
+                                            <input class="update-quantity" type="number" value="{{ $totalItems }}"
                                                 min="1" data-item-id="{{ $item->id }}"
                                                 style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;">
                                         </td>
@@ -107,6 +81,7 @@
                     <div style="font-size: 1.25em; font-weight: bold;">
                         {{ $cart->items->count() }} sản phẩm
                     </div>
+                    <div class="divider-top"></div>
                     <div style="display: flex; justify-content: space-between;">
                         <div>Tổng phụ</div>
                         <div>{{ number_format($total, 0, ',', '.') }} VNĐ</div>
@@ -116,6 +91,8 @@
                             <option>Chọn phương thức giao hàng</option>
                         </select>
                     </div>
+                    <div class="divider-bottom"></div>
+                    <br>
                     <div style="display: flex; justify-content: space-between; font-weight: bold;">
                         <div>TỔNG</div>
                         <div>{{ number_format($total, 0, ',', '.') }} VNĐ</div>
@@ -199,7 +176,7 @@
     table,
     th,
     td {
-        border: 1px solid #ccc;
+        border: 1px solid #ccc !important;
     }
 
     th,
@@ -250,6 +227,16 @@
         background-color: #333;
         color: white;
         border: none;
+    }
+
+    .divider-bottom {
+        border: 1px dashed #ccc;
+        margin: 40px 0;
+    }
+
+    .divider-top {
+        border: 1px dashed #ccc;
+        margin: 16px 0;
     }
 </style>
 

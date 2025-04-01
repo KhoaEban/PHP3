@@ -10,10 +10,6 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     {{-- Bootstrap 5 --}}
@@ -36,9 +32,14 @@
     <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Oswald:wght@200..700&display=swap"
+        rel="stylesheet">
+
     <!-- Main Stylesheet File -->
     <link href="/css/style.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -105,7 +106,7 @@
                             <div class="discount-icon text-center text-white d-flex justify-content-center align-items-center"
                                 style="position: absolute; top: 0px; right: 0px; background-color: red; width: 20px; height: 20px; border-radius: 50%;">
                                 <span class="discount-number">
-                                    {{ $totalItems  }}
+                                    {{ $totalItems }}
                                 </span>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -169,6 +170,13 @@
 
 </html>
 <style>
+    * {
+        font-family: "Oswald", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: <weight>;
+        font-style: normal;
+    }
+
     /* --- Navbar --- */
     .navbar {
         background-color: #ffffff !important;

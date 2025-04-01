@@ -21,32 +21,5 @@
 </head>
 
 <body>
-    {{-- <div id="app">
-        @php
-
-        @endphp
-
-        @auth
-            @php
-
-            @endphp
-
-            @if (Auth::user()->role === 'admin')
-                @include('layouts.navbar_admin')
-            @else
-                @include('layouts.navbar_user')
-            @endif
-        @else
-            @include('layouts.navbar_user') <!-- Mặc định cho khách -->
-        @endauth
-
-
-        <div class="container">
-            @yield('content')
-        </div>
-
-        <footer class="bg-dark text-white text-center p-3" style="position: fixed; bottom: 0; width: 100%;">
-            <p>PHP3 - Laravel</p>
-        </footer>
-    </div> --}}
+    
 </body>

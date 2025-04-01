@@ -19,79 +19,40 @@ class CartController extends Controller
         // Lấy giỏ hàng của người dùng và quan hệ với CartItem
         $cart = Cart::where('user_id', Auth::id())->with('items')->first();
 
-        // Nếu giỏ hàng không tồn tại, trả về giá trị mặc định
-        if (!$cart) {
-            $totalItems = 0;
-        } else {
-            // Tính tổng số lượng sản phẩm trong giỏ hàng
-            $totalItems = $cart->items->sum('quantity');
-        }
-
         return view('user.cart.show', compact('cart', 'totalItems'));
     }
 
 
     // Thêm sản phẩm vào giỏ hàng
-    // public function addToCart(Request $request, $productId)
-    // {
-    //     // Kiểm tra sản phẩm có tồn tại
-    //     $product = Product::findOrFail($productId);
-
-    //     // Nếu người dùng chưa đăng nhập, giỏ hàng sẽ được lưu trong session
-    //     $user = Auth::user(); // Nếu người dùng đã đăng nhập
-    //     $cart = $user ? $user->cart : Session::get('cart');
-
-    //     if (!$cart) {
-    //         // Nếu chưa có giỏ hàng, tạo mới
-    //         $cart = Cart::create(['user_id' => $user ? $user->id : null]);
-    //         if (!$user) {
-    //             // Lưu giỏ hàng vào session nếu người dùng chưa đăng nhập
-    //             Session::put('cart', $cart);
-    //         }
-    //     }
-
-    //     // Kiểm tra số lượng và giá
-    //     $quantity = $request->input('quantity', 1);
-
-    //     // Thêm sản phẩm vào giỏ hàng
-    //     $cartItem = $cart->items()->where('product_id', $productId)->first();
-
-    //     if ($cartItem) {
-    //         // Nếu sản phẩm đã có trong giỏ hàng, chỉ cần tăng số lượng
-    //         $cartItem->update(['quantity' => $cartItem->quantity + $quantity]);
-    //     } else {
-    //         // Nếu sản phẩm chưa có trong giỏ hàng, tạo mới
-    //         CartItem::create([
-    //             'cart_id' => $cart->id,
-    //             'product_id' => $productId,
-    //             'quantity' => $quantity,
-    //             'price' => $product->price,
-    //         ]);
-    //     }
-
-    //     return redirect()->route('cart.show')->with('success', 'Sản phẩm đã được thêm vào giỏ hàng!');
-    // }
-
     public function addToCart(Request $request, $productId)
     {
+        // Kiểm tra sản phẩm có tồn tại
         $product = Product::findOrFail($productId);
-        $user = Auth::user();
+
+        // Nếu người dùng chưa đăng nhập, giỏ hàng sẽ được lưu trong session
+        $user = Auth::user(); // Nếu người dùng đã đăng nhập
         $cart = $user ? $user->cart : Session::get('cart');
 
         if (!$cart) {
+            // Nếu chưa có giỏ hàng, tạo mới
             $cart = Cart::create(['user_id' => $user ? $user->id : null]);
             if (!$user) {
+                // Lưu giỏ hàng vào session nếu người dùng chưa đăng nhập
                 Session::put('cart', $cart);
             }
         }
 
+        // Kiểm tra số lượng và giá
         $quantity = $request->input('quantity', 1);
+
+        // Thêm sản phẩm vào giỏ hàng
         $cartItem = $cart->items()->where('product_id', $productId)->first();
 
         if ($cartItem) {
-            // Cập nhật số lượng thay vì tạo mới
+            // Nếu sản phẩm đã có trong giỏ hàng, chỉ cần tăng số lượng
             $cartItem->update(['quantity' => $cartItem->quantity + $quantity]);
         } else {
+            // Nếu sản phẩm chưa có trong giỏ hàng, tạo mới
             CartItem::create([
                 'cart_id' => $cart->id,
                 'product_id' => $productId,

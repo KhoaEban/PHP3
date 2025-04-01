@@ -94,6 +94,7 @@ Route::prefix('user')->group(function () {
         Route::get('/', [CartController::class, 'showCart'])->name('cart.show');
         Route::get('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
         Route::post('/update', [CartController::class, 'updateCart'])->name('cart.update');
+        Route::get('/total-items', [CartController::class, 'getTotalItems'])->name('cart.totalItems');
     });
 
     Route::prefix('profile')->group(function () {

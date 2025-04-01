@@ -36,4 +36,9 @@ class ConfirmPasswordController extends Controller
     {
         $this->middleware('auth');
     }
+
+    public function redirectTo()
+    {
+        return '/dashboard'; // Điều hướng về trang dashboard sau khi xác nhận mật khẩu
+    }
 }
