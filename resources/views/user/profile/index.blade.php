@@ -5,8 +5,9 @@
         <div class="row">
             <div class="col-4">
                 <div class="profile">
-                    <img src="{{ $user->avatar ?? 'https://placehold.co/96x96' }}" alt="User profile picture">
-                    <p class="name">{{ $user->name }}</p>
+                    <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : ($user->google_id ? 'https://www.google.com/s2/photos/profile/' . $user->google_id : 'https://placehold.co/96x96') }}"
+                        alt="User profile picture">
+                    <p class="name h3">{{ $user->name }}</p>
                     <button><i class="fas fa-edit"></i> <a href="{{ route('user.profile.edit') }}">Chỉnh sửa hồ
                             sơ</a></button>
                     <p class="email mt-3"><i class="fas fa-envelope"></i> {{ $user->email }}</p>
@@ -44,17 +45,21 @@
                                     <p>Sản phẩm đã mua (0)</p>
                                 </div>
                                 <div class="grid">
-                                    <div class="course-card">
-                                        <img src="https://placehold.co/300x200" alt="React JS course image">
-                                        <div class="content">
-                                            <p class="title">React JS course</p>
-                                            <p class="price">150.000 VNĐ</p>
-                                            <div class="info">
-                                                <i class="fas fa-user"></i> Tác giả: Nguyễn Văn A
-                                                <i class="fas fa-folder"></i> Danh mục: Sách lập trình
+                                    @forelse($user->purchasedProducts ?? [] as $product)
+                                        <div class="course-card">
+                                            <img src="https://placehold.co/300x200" alt="React JS course image">
+                                            <div class="content">
+                                                <p class="title">React JS course</p>
+                                                <p class="price">150.000 VNĐ</p>
+                                                <div class="info">
+                                                    <i class="fas fa-user"></i> Tác giả: Nguyễn Văn A
+                                                    <i class="fas fa-folder"></i> Danh mục: Sách lập trình
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @empty
+                                        <p>Chưa có sản phẩm nào được mua.</p>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>

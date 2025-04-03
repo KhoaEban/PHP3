@@ -24,18 +24,18 @@
                 </div>
                 <i class="fas fa-chevron-right"></i>
             </div>
-            <div class="item">
+            <div class="item" data-bs-toggle="modal" data-bs-target="#editBioModal">
                 <div>
                     <p>Giới thiệu</p>
-                    <p class="value text-dark">Chưa cập nhật</p>
+                    <p class="value text-dark">{{ $user->description ? $user->description : 'Chưa cập nhật' }}</p>
                 </div>
                 <i class="fas fa-chevron-right"></i>
             </div>
-            <div class="item">
+            <div class="item" data-bs-toggle="modal" data-bs-target="#editAvatarModal">
                 <div class="avatar">
                     <p>Ảnh đại diện</p>
-                    <img src="{{ $user->avatar ?? 'https://placehold.co/96x96' }}" alt="User avatar placeholder"
-                        width="40" height="40">
+                    <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : ($user->google_id ? 'https://www.google.com/s2/photos/profile/' . $user->google_id : 'https://placehold.co/96x96') }}"
+                        alt="User  avatar placeholder" width="40" height="40">
                 </div>
                 <i class="fas fa-chevron-right"></i>
             </div>
@@ -45,7 +45,6 @@
     <!-- Modal Chỉnh Sửa Tên -->
     <div class="modal fade" id="editNameModal" tabindex="-1" aria-labelledby="editNameModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="layoutss"></div>
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title" id="editNameModalLabel">Cập nhật tên của bạn</h2>
@@ -63,6 +62,59 @@
                     </div>
                     <div class="modal-footer">
                         <p class="note">Tên khác được hiển thị bên cạnh họ và tên của bạn trên trang cá nhân.</p>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa Giới thiệu -->
+    <div class="modal fade" id="editBioModal" tabindex="-1" aria-labelledby="editBioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="editBioModalLabel">Cập nhật giới thiệu</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <p class="description">Giới thiệu sẽ được hiển thị trên trang cá nhân, trong các bình luận và bài viết của baise.</p>
+                <form action="{{ route('user.updateBio') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="description">Giới thiệu</label>
+                            <textarea name="description" id="description" class="form-control" rows="4">{{ old('description', $user->description) }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu lại</button>
+                    </div>
+                </form> 
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa Hình Avatar -->
+    <div class="modal fade" id="editAvatarModal" tabindex="-1" aria-labelledby="editAvatarModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="editAvatarModalLabel">Cập nhật hình đại diện</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <p class="description">Sửa hình đại diện công khai trong trang cá nhân.</p>
+                <form action="{{ route('user.updateAvatar') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="avatar">Sửa hình đại diện</label>
+                            <input type="file" name="avatar" id="avatar" class="form-control" accept="image/*"
+                                required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                         <button type="submit" class="btn btn-primary">Lưu lại</button>
                     </div>

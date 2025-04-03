@@ -100,7 +100,11 @@ Route::prefix('user')->group(function () {
     Route::prefix('profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
         Route::get('/edit', [UserController::class, 'editProfile'])->name('user.profile.edit');
-        Route::post('/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
+        Route::post('/update', [UserController::class, 'updateProfileName'])->name('user.updateProfile');
+        Route::post('/update-avatar', [UserController::class, 'updateAvatar'])->name('user.updateAvatar');
+        Route::post('/update-bio', [UserController::class, 'updateProfileBio'])->name('user.updateBio');
+        Route::get('/change-password', [UserController::class, 'changePassword'])->name('user.password.edit');
+        Route::post('/update-password', [UserController::class, 'updateProfilePassword'])->name('user.updatePassword');
     });
 
     // Tìm kiếm sản phẩm
