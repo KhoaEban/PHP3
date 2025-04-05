@@ -12,7 +12,7 @@
         <div class="info py-2">
             <div class="item" data-bs-toggle="modal" data-bs-target="#editPasswordModal">
                 <div>
-                    <p>Tạo mật khẩu</p>
+                    <p>Đặt lại mật khẩu</p>
                     <p class="value text-dark">{{ $user->name }}</p>
                 </div>
                 <i class="fas fa-chevron-right"></i>
@@ -21,30 +21,35 @@
     </div>
 
     <!-- Modal thay đổi mật khẩu -->
-    <div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordModal" aria-hidden="true">
+    <div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title" id="editPasswordModal">Xác minh email</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h2 class="modal-title" id="editPasswordModalLabel">Đổi mật khẩu</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
-                <p class="description">Để tạo mật khẩu, hãy xác minh email của bạn trước.</p>
                 <form action="{{ route('user.updatePassword') }}" method="POST">
                     @csrf
                     <div class="modal-body">
+                        @if (!$user->google_id)
+                            <div class="form-group">
+                                <label for="current_password">Mật khẩu hiện tại</label>
+                                <input type="password" name="current_password" id="current_password" class="form-control">
+                            </div>
+                        @endif
                         <div class="form-group">
-                            <label for="name">Họ và tên</label>
-                            <input type="text" name="name" id="name" class="form-control"
-                                value="{{ old('name', $user->name) }}" required>
+                            <label for="password">Mật khẩu mới</label>
+                            <input type="password" name="password" id="password" class="form-control" required>
                         </div>
-                        <div class="form-group form_code">
-                            <input type="text" name="code" id="code" class="form-control"
-                                placeholder="Nhập mã xác minh">
-                            <button type="button" class="btn btn-primary">Gửi mã</button>
+                        <div class="form-group">
+                            <label for="password_confirmation">Nhập lại mật khẩu mới</label>
+                            <input type="password" name="password_confirmation" id="password_confirmation"
+                                class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Xác minh</button>
+                        <button type="submit" class="btn btn-primary">Cập nhật mật khẩu</button>
                     </div>
                 </form>
             </div>
@@ -215,3 +220,4 @@
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
     }
 </style>
+

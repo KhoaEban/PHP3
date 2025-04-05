@@ -54,17 +54,19 @@
             <div class="logo">
                 <div class="icon d-flex align-items-center">
                     <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : ($user->google_id ? 'https://www.google.com/s2/photos/profile/' . $user->google_id : 'https://placehold.co/96x96') }}"
-                        alt="User profile picture" width="80" height="80">
-                        <h4 class="name ms-3">{{ $user->name }}</h4>
+                        alt="User profile picture" width="80" height="80" style="object-fit: cover">
+                    <h4 class="name ms-3">{{ $user->name }}</h4>
                 </div>
             </div>
             <h1>Cài đặt tài khoản</h1>
             <p>Quản lý cài đặt tài khoản của bạn như thông tin cá nhân, cài đặt bảo mật, quản lý thông báo, v.v.</p>
             <button class="primary">
-                <span><i class="fas fa-user"></i> <a href="{{ route('user.profile.edit') }}"> Thống tin cá nhân</a></span>
+                <span><i class="fas fa-user"></i> <a href="{{ route('user.profile.edit') }}"> Thống tin cá
+                        nhân</a></span>
             </button>
             <button class="secondary">
-                <span><i class="fas fa-lock"></i> <a href="{{ route('user.password.edit') }}"> Mật khẩu và bảo mật</a></span>
+                <span><i class="fas fa-lock"></i> <a href="{{ route('user.password.edit') }}"> Mật khẩu và bảo
+                        mật</a></span>
             </button>
         </div>
     </div>
@@ -255,3 +257,28 @@
         margin-top: 8px;
     }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if (session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: "{{ session('success') }}",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    </script>
+@endif
+
+@if (session('error'))
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: "{{ session('error') }}",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    </script>
+@endif

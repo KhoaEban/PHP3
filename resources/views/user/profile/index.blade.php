@@ -7,14 +7,24 @@
                 <div class="profile">
                     <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : ($user->google_id ? 'https://www.google.com/s2/photos/profile/' . $user->google_id : 'https://placehold.co/96x96') }}"
                         alt="User profile picture">
-                    <p class="name h3">{{ $user->name }}</p>
+                    <p class="name h4 text-center mt-3">{{ $user->name }}</p>
                     <button><i class="fas fa-edit"></i> <a href="{{ route('user.profile.edit') }}">Chỉnh sửa hồ
                             sơ</a></button>
-                    <p class="email mt-3"><i class="fas fa-envelope"></i> {{ $user->email }}</p>
-                    <p class="role"><i class="fas fa-user"></i> Vai trò:
-                        {{ $user->role == 'admin' ? 'Quản trị viên' : 'Người dùng' }}</p>
-                    <p class="joined"><i class="fas fa-calendar-alt"></i> Tham gia từ
-                        {{ $user->created_at->diffForHumans() }}</p>
+                    <p class="description mt-3 p-3 text-center"><i class="fas fa-info-circle"></i>
+                        {{ $user->description ? $user->description : 'Chưa cập nhật' }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="email mt-3"><i class="fas fa-envelope"></i> {{ $user->email }}</p>
+                            <p class="role"><i class="fas fa-user"></i> Vai trò:
+                                {{ $user->role == 'admin' ? 'Quản trị viên' : 'Người dùng' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="joined"><i class="fas fa-calendar-alt"></i> 
+                                Tham gia từ: 
+                                {{ $user->created_at->format('d/m/Y') }}</p>
+                                {{ $user->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-8">
@@ -102,6 +112,15 @@
         background-color: #e2e2e2;
         border: none;
         border-radius: 9999px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .description {
+        margin-top: 8px;
+        padding: 8px 16px;
+        background-color: #e2e2e2;
+        border-radius: 8px;
         font-size: 14px;
         font-weight: 500;
     }
