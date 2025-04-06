@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
-use App\Models\ProductImage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +18,7 @@ class ProductController extends Controller
             return redirect('404')->with('error', 'Bạn không có quyền truy cập!');
         }
 
-        $query = Product::with(['categories', 'brands']);
+        $query = Product::with(['categories', 'brands', 'variants']);
 
         if ($request->has('search') && !empty($request->search)) {
             $search = trim($request->search);
@@ -37,6 +36,8 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products'));
     }
 
+
+
     public function create()
     {
         $categories = Category::all();
@@ -50,30 +51,34 @@ class ProductController extends Controller
             'category_ids' => 'required|array',
             'brand_ids' => 'required|array',
             'title' => 'required',
-            'price' => 'required|numeric',
-            'stock' => 'required|numeric',
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'price' => 'required|numeric|min:0', // Validate giá sản phẩm
+            'stock' => 'required|integer|min:0', // Validate số lượng sản phẩm
         ]);
 
         $imagePath = $request->file('image')->store('products', 'public');
 
+        // Tạo sản phẩm mới
         $product = Product::create([
             'title' => $request->title,
             'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
             'status' => $request->status,
             'image' => $imagePath,
+            'price' => $request->price, // Lưu giá sản phẩm
+            'stock' => $request->stock, // Lưu số lượng sản phẩm
         ]);
 
+        // Liên kết danh mục và thương hiệu
         $product->categories()->sync($request->category_ids);
         $product->brands()->sync($request->brand_ids);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
-                ProductImage::create(['product_id' => $product->id, 'image' => $path]);
+        // Nếu sản phẩm có biến thể, lưu biến thể với giá và số lượng tương ứng
+        if ($request->has('variants')) {
+            foreach ($request->variants as $variant) {
+                $product->variants()->create([
+                    'price' => $variant['price'] ?? $product->price, // Dùng giá của sản phẩm chính nếu không có giá biến thể
+                    'stock' => $variant['stock'] ?? $product->stock, // Dùng số lượng của sản phẩm chính nếu không có số lượng biến thể
+                ]);
             }
         }
 
@@ -93,27 +98,53 @@ class ProductController extends Controller
             'category_ids' => 'required|array',
             'brand_ids' => 'required|array',
             'title' => 'required',
-            'price' => 'required|numeric',
-            'stock' => 'required|numeric',
-            'image' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'price' => 'required|numeric|min:0', // Validate giá sản phẩm
+            'stock' => 'required|integer|min:0', // Validate số lượng sản phẩm
         ]);
 
-        $data = $request->all();
+        $data = $request->only([
+            'title',
+            'description',
+            'status',
+            'price',  // Cập nhật giá
+            'stock',  // Cập nhật số lượng
+        ]);
 
         if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($product->image) {
+                Storage::delete('public/' . $product->image);
+            }
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
+        // Cập nhật sản phẩm
         $product->update($data);
+
+        // Cập nhật danh mục và thương hiệu
         $product->categories()->sync($request->category_ids);
         $product->brands()->sync($request->brand_ids);
 
-        if ($request->hasFile('images')) {
-            ProductImage::where('product_id', $product->id)->delete();
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
-                ProductImage::create(['product_id' => $product->id, 'image' => $path]);
+        // Nếu có thêm biến thể mới, xử lý các biến thể
+        if ($request->has('variants')) {
+            foreach ($request->variants as $variant) {
+                // Kiểm tra nếu biến thể đã có trong cơ sở dữ liệu, nếu chưa thì tạo mới
+                $existingVariant = $product->variants()->find($variant['id']);
+                if ($existingVariant) {
+                    // Cập nhật biến thể nếu đã tồn tại
+                    $existingVariant->update([
+                        'price' => $variant['price'] ?? $product->price, // Nếu không có giá, lấy giá sản phẩm chính
+                        'stock' => $variant['stock'] ?? $product->stock, // Nếu không có số lượng, lấy số lượng sản phẩm chính
+                    ]);
+                } else {
+                    // Tạo mới biến thể nếu chưa có
+                    $product->variants()->create([
+                        'price' => $variant['price'] ?? $product->price, // Dùng giá sản phẩm chính nếu không có
+                        'stock' => $variant['stock'] ?? $product->stock, // Dùng số lượng sản phẩm chính nếu không có
+                        // Các thông tin khác của biến thể
+                    ]);
+                }
             }
         }
 

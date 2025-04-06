@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomersControllerAdmin;
+use App\Http\Controllers\Admin\ProductVariantController;
 
 // Route cho user
 use App\Http\Controllers\User\UserController;
@@ -41,6 +42,16 @@ Route::middleware(['check.role:admin'])->group(function () {
         Route::get('/products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
         Route::put('/products/update/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/delete/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+        // Quản lý biến thể sản phẩm
+        Route::prefix('products')->group(function () {
+            Route::get('/variants/{variantId}/show-variants', [ProductVariantController::class, 'index'])->name('product_variants.index');
+            Route::get('/variants/{productId}/create', [ProductVariantController::class, 'create'])->name('product_variants.create');
+            Route::post('/variants/{productId}/variants', [ProductVariantController::class, 'store'])->name('product_variants.store');
+            Route::get('/variants/edit/{variantId}', [ProductVariantController::class, 'edit'])->name('product_variants.edit');
+            Route::put('/variants/update/{variantId}', [ProductVariantController::class, 'update'])->name('product_variants.update');
+            Route::delete('/variants/delete/{variantId}', [ProductVariantController::class, 'destroy'])->name('product_variants.destroy');
+        });
     });
 
     // Route quản lý danh mục trong Admin
@@ -89,6 +100,8 @@ Route::prefix('user')->group(function () {
         Route::get('/{slug}', [ProductControllerUser::class, 'show'])->name('user.products.show');
         Route::post('/product/{productId}/add-to-cart', [CartController::class, 'addToCart'])->name('cart.add');
     });
+    Route::get('/get-variant-image', [ProductControllerUser::class, 'getVariantImage']);
+
 
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'showCart'])->name('cart.show');

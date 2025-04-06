@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Category;
 use App\Models\Brand;
 
@@ -38,14 +39,22 @@ class ProductControllerUser extends Controller
         }
 
         // Lọc theo giá
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', (int) $request->min_price);
-        }
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', (int) $request->max_price);
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $minPrice = $request->filled('min_price') ? (int) $request->min_price : 0;
+            $maxPrice = $request->filled('max_price') ? (int) $request->max_price : 10000000;
+
+            // Lọc sản phẩm chính và sản phẩm biến thể theo giá
+            $query->where(function ($query) use ($minPrice, $maxPrice) {
+                // Lọc sản phẩm chính
+                $query->whereBetween('price', [$minPrice, $maxPrice])
+                    // Lọc sản phẩm biến thể
+                    ->orWhereHas('variants', function ($q) use ($minPrice, $maxPrice) {
+                        $q->whereBetween('price', [$minPrice, $maxPrice]);
+                    });
+            });
         }
 
-        // Sắp xếp
+        // Lọc theo sắp xếp
         if ($request->sort == 'price_asc') {
             $query->orderBy('price', 'asc');
         } elseif ($request->sort == 'price_desc') {
@@ -56,7 +65,7 @@ class ProductControllerUser extends Controller
 
         $products = $query->paginate(12);
         $categories = Category::all();
-        $brands = Brand::all();
+        $brands = Brand::all();  // Khai báo danh sách thương hiệu
 
         return view('user.products.product', compact('products', 'categories', 'brands', 'selectedCategory', 'selectedBrand'));
     }
@@ -65,6 +74,15 @@ class ProductControllerUser extends Controller
     {
         // Tìm sản phẩm theo slug
         $product = Product::where('slug', $slug)->firstOrFail();
+
+        // Lấy tất cả các biến thể của sản phẩm
+        $ProductVariants = $product->variants;
+
+        // Lấy các ảnh phụ từ các biến thể
+        $variantImages = [];
+        foreach ($ProductVariants as $variant) {
+            $variantImages[$variant->id] = $variant->images; // Lưu các ảnh phụ theo ID biến thể
+        }
 
         // Lấy danh mục đầu tiên của sản phẩm (nếu có)
         $category = $product->categories()->first();
@@ -83,9 +101,26 @@ class ProductControllerUser extends Controller
                 ->get();
         }
 
-        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName'));
+        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName', 'ProductVariants', 'variantImages'));
     }
 
+    public function getVariantImage(Request $request)
+    {
+        $type = $request->query('type');
+        $value = $request->query('value');
+
+        $variant = ProductVariant::where('variant_type', $type)
+            ->where('variant_value', $value)
+            ->first();
+
+        if ($variant && $variant->images->isNotEmpty()) {
+            return response()->json([
+                'image_url' => asset('storage/' . $variant->images->first()->image_path),
+            ]);
+        }
+
+        return response()->json(['image_url' => null]);
+    }
 
     public function search(Request $request)
     {

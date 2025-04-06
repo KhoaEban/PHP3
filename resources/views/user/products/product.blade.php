@@ -96,13 +96,12 @@
                     @endforeach
                 </ul>
 
-                {{-- Bộ lọc giá --}}
+                <!-- Bộ lọc giá -->
                 <h5 class="mt-4 fw-bold">LỌC THEO GIÁ</h5>
                 <div class="list-group border px-4 py-3">
                     <form method="GET" action="{{ route('user.products') }}" id="filter-form">
                         <input type="hidden" name="category" value="{{ request('category') }}">
 
-                        <!-- Hiển thị khoảng giá -->
                         <div class="mb-3">
                             <label for="price-slider" class="form-label fw-bold">Khoảng giá:</label>
 
@@ -118,11 +117,9 @@
                             <div id="price-slider" class="mt-3"></div>
                         </div>
 
-                        <!-- Input ẩn để gửi giá trị -->
                         <input type="hidden" name="min_price" id="min_price" value="{{ request('min_price', 0) }}">
                         <input type="hidden" name="max_price" id="max_price" value="{{ request('max_price', 10000000) }}">
 
-                        {{-- Gợi ý mức giá --}}
                         <div class="mb-3">
                             <strong>Gợi ý:</strong>
                             <div class="d-flex flex-wrap gap-2">
@@ -138,7 +135,6 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <!-- Nút Lọc giờ sẽ ẩn, không cần click -->
                             <button type="submit" class="btn-dark flex-grow-1 p-2" id="submit-filter">Lọc</button>
                             <a href="{{ route('user.products') }}" class="btn-secondary p-2" id="clear-filter"
                                 style="display: none;">Xóa</a>
@@ -173,16 +169,15 @@
                         @endif
                     </h2>
 
-
                     <form method="GET" action="{{ route('user.products') }}">
                         <input type="hidden" name="category" value="{{ request('category') }}">
                         <input type="hidden" name="min_price" value="{{ request('min_price') }}">
                         <input type="hidden" name="max_price" value="{{ request('max_price') }}">
+
                         <select name="sort" class="form-select" onchange="this.form.submit()">
                             <option value="">Sắp xếp theo</option>
                             <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá thấp →
-                                cao
-                            </option>
+                                cao</option>
                             <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá cao →
                                 thấp</option>
                             <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
@@ -204,38 +199,70 @@
                         </div>
                     @else
                         @foreach ($products as $product)
-                            <div class="col-md-3 mb-4">
-                                <div class="card h-100 shadow-sm">
-                                    <a href="{{ route('user.products.show', $product->slug) }}"
-                                        class="text-decoration-none text-dark">
-                                        <div class="card-img">
-                                            <img class="card-img-top lazyload"
-                                                src="{{ asset('storage/' . $product->image) }}"
-                                                alt="{{ $product->title }}" loading="lazy">
-                                        </div>
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title text-start">{{ $product->title }}</h6>
-                                            <p class="text-danger text-start">
-                                                {{ number_format($product->price, 0, ',', '.') }} VNĐ
-                                            </p>
-                                        </div>
-                                    </a>
-                                    @if ($product->brands->isNotEmpty())
-                                        <div class="card-footer text-muted text-center">
-                                            @php
-                                                $parentBrands = $product->brands->whereNull('parent_id')->unique();
-                                            @endphp
+                            @if ($product->status == 1)
+                                {{-- Chỉ hiển thị nếu status = 1 --}}
+                                <div class="col-md-3 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <a href="{{ route('user.products.show', $product->slug) }}"
+                                            class="text-decoration-none text-dark">
+                                            <div class="card-img">
+                                                <img class="card-img-top lazyload"
+                                                    src="{{ asset('storage/' . $product->image) }}"
+                                                    alt="{{ $product->title }}" loading="lazy">
+                                            </div>
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-start">{{ $product->title }}</h6>
 
-                                            @foreach ($parentBrands as $brand)
-                                                {{ $brand->name }}
-                                                @if (!$loop->last)
-                                                    ,
+                                                @if ($product->variants->isNotEmpty())
+                                                    <!-- Nếu sản phẩm có biến thể -->
+                                                    @php
+                                                        $minPrice = $product->variants->min('price'); // Giá thấp nhất
+                                                        $maxPrice = $product->variants->max('price'); // Giá cao nhất
+                                                    @endphp
+
+                                                    @if ($minPrice == $maxPrice)
+                                                        <!-- Nếu giá min và max bằng nhau (tức là chỉ có 1 biến thể) -->
+                                                        <p class="text-danger m-0">
+                                                            {{ number_format($minPrice, 0, ',', '.') }} VNĐ
+                                                        </p>
+                                                    @else
+                                                        <!-- Nếu có nhiều biến thể, hiển thị giá từ thấp nhất đến cao nhất -->
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <p class="text-danger m-0">
+                                                                {{ number_format($minPrice, 0, ',', '.') }} VNĐ
+                                                            </p>
+                                                            <span>-</span>
+                                                            <p class="text-danger m-0">
+                                                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ
+                                                            </p>
+                                                        </div>
+                                                    @endif
+                                                @else
+                                                    <!-- Nếu sản phẩm không có biến thể, hiển thị giá chính của sản phẩm -->
+                                                    <p class="text-danger text-start">
+                                                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                                    </p>
                                                 @endif
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                            </div>
+                                        </a>
+
+                                        @if ($product->brands->isNotEmpty())
+                                            <div class="card-footer text-muted text-center">
+                                                @php
+                                                    $parentBrands = $product->brands->whereNull('parent_id')->unique();
+                                                @endphp
+
+                                                @foreach ($parentBrands as $brand)
+                                                    {{ $brand->name }}
+                                                    @if (!$loop->last)
+                                                        ,
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
                     @endif
                 </div>

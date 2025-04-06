@@ -11,71 +11,134 @@
             <div class="product-image">
                 <div class="row">
                     <div class="col-12">
-                        <img id="mainImage" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}">
+                        <img id="mainProductImage" src="{{ asset('storage/' . $product->image) }}"
+                            alt="{{ $product->title }}" class="w-100">
                     </div>
                     <div class="col-12">
                         <!-- Hình ảnh phụ -->
-                        @if ($product->images->isNotEmpty())
-                            <div class="product-thumbnails mt-3 mx-0">
-                                <div class="container py-0">
-                                    <div class="row">
-                                        @foreach ($product->images as $image)
+                        <div class="product-thumbnails mt-3 mx-0">
+                            <div class="container py-0">
+                                <div class="row">
+                                    @foreach ($ProductVariants as $variant)
+                                        @foreach ($variantImages[$variant->id] as $image)
                                             <div class="col-3">
-                                                <img src="{{ asset('storage/' . $image->image) }}" width="100%"
-                                                    class="thumbnail" alt="{{ $image->image }}"
-                                                    onclick="changeImage('{{ asset('storage/' . $image->image) }}')">
+                                                <img src="{{ asset('storage/' . $image->image_path) }}"
+                                                    alt="Image for {{ $variant->variant_value }}"
+                                                    onclick="changeImage('{{ asset('storage/' . $image->image_path) }}')">
                                             </div>
                                         @endforeach
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endif
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="product-info">
+                <p>Sản phẩm / {{ $categoryName }} / {{ $product->title }}</p>
                 <h2>{{ $product->title }}</h2>
-                <p class="price">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
 
-                <p><strong>Danh mục:</strong> {{ $categoryName }}</p>
+                @if ($product->variants->isNotEmpty())
+                    @php
+                        $minPrice = $product->variants->min('price');
+                        $maxPrice = $product->variants->max('price');
+                    @endphp
 
-                @php
-                    $brandNames = $product->brands
-                        ->filter(function ($brand) {
-                            return $brand->parent;
-                        })
-                        ->map(function ($brand) {
-                            return $brand->name . ' (thuộc ' . $brand->parent->name . ')';
-                        })
-                        ->unique();
-                @endphp
+                    <div class="d-flex align-items-center gap-1">
+                        <p class="text-danger m-0 price">
+                            {{ number_format($minPrice, 0, ',', '.') }} VNĐ
+                        </p>
+                        @if ($minPrice !== $maxPrice)
+                            <span>-</span>
+                            <p class="text-danger m-0 price">
+                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ
+                            </p>
+                        @endif
+                    </div>
 
-                @if ($brandNames->isNotEmpty())
-                    <p><strong>Tác giả:</strong> <span>{!! implode('<br>', $brandNames->toArray()) !!}</span></p>
-                @endif
+                    {{-- Loại bìa --}}
+                    <div class="mb-3 mt-5 d-flex align-items-center gap-2">
+                        <span class="fw-bold">Bìa:</span>
+                        @foreach ($ProductVariants->unique('variant_type') as $variant)
+                            <button class="mx-1 variant-type-btn" type="button" data-type="{{ $variant->variant_type }}">
+                                <p class="m-0">{{ $variant->variant_type }}</p>
+                            </button>
+                        @endforeach
+                    </div>
 
-                @if ($product->stock < 10)
-                    <p class="text-warning fw-bold">⚠ Chỉ còn {{ $product->stock }} sản phẩm trong kho!</p>
-                @endif
+                    {{-- Loại giấy --}}
+                    <div class="mb-3">
+                        <span class="fw-bold">Loại giấy:</span>
+                        @foreach ($ProductVariants->unique('variant_value') as $variant)
+                            <button class="mx-1 variant-value-btn" type="button"
+                                data-value="{{ $variant->variant_value }}">
+                                <p class="m-0">{{ $variant->variant_value }}</p>
+                            </button>
+                        @endforeach
+                    </div>
 
-                <div class="d-flex align-items-end">
+                    {{-- Giá & tồn kho cho biến thể đầu tiên (ví dụ minh họa) --}}
+                    @php $firstVariant = $ProductVariants->first(); @endphp
+
+                    <div class="d-flex gap-1 align-items-center mb-3">
+                        <span class="fw-bold">Giá:</span>
+                        <p class="m-0 text-danger">{{ number_format($firstVariant->price, 0, ',', '.') }} VNĐ</p>
+                    </div>
+
+                    @if ($firstVariant->stock < 10)
+                        <p class="text-warning fw-bold">⚠ Chỉ còn {{ $firstVariant->stock }} sản phẩm trong kho!</p>
+                    @endif
+
+                    {{-- Form thêm vào giỏ hàng --}}
                     <form action="{{ route('cart.add', $product->id) }}" method="POST" id="addToCartForm">
                         @csrf
-                        <div class="quantity-input mb-3 mt-5">
+                        <div class="quantity-input mb-3 mt-2">
+                            <label for="quantity" class="fw-bold">Số lượng:</label>
+                            <input type="number" name="quantity" id="quantity" value="1" min="1"
+                                max="{{ $firstVariant->stock }}" class="form-control">
+                        </div>
+                        <button type="submit" class="bg-dark text-white py-2 px-3 mt-3 border-1">Thêm vào giỏ hàng</button>
+                        <p id="quantityError" class="text-danger mt-2" style="display: none;">Số lượng không hợp lệ!</p>
+                    </form>
+                    <p><strong>Số lượng có sẵn:</strong> {{ $firstVariant->stock }} sản phẩm</p>
+                @else
+                    {{-- KHÔNG CÓ BIẾN THỂ --}}
+                    <p class="text-danger text-start price">
+                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                    </p>
+
+                    {{-- Tồn kho sản phẩm --}}
+                    @if ($product->stock < 10)
+                        <p class="text-warning fw-bold">⚠ Chỉ còn {{ $product->stock }} sản phẩm trong kho!</p>
+                    @endif
+
+                    {{-- Form thêm vào giỏ hàng --}}
+                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="addToCartForm">
+                        @csrf
+                        <div class="quantity-input mb-3 mt-2">
                             <label for="quantity" class="fw-bold">Số lượng:</label>
                             <input type="number" name="quantity" id="quantity" value="1" min="1"
                                 max="{{ $product->stock }}" class="form-control">
                         </div>
-
-                        <button type="submit" class="bg-dark text-white py-2 px-3 mt-5 border-1">Thêm vào giỏ hàng</button>
+                        <button type="submit" class="bg-dark text-white py-2 px-3 mt-3 border-1">Thêm vào giỏ hàng</button>
                         <p id="quantityError" class="text-danger mt-2" style="display: none;">Số lượng không hợp lệ!</p>
                     </form>
-                    <a href="#" style="border: 1px solid #4E4E4E" class="text-dark py-2 px-3 mt-5 mb-3 mx-3">Mua
-                        ngay</a>
-                </div>
-                <p><strong>Số lượng có sẵn:</strong> {{ $product->stock }} sản phẩm</p>
+                    <p><strong>Số lượng có sẵn:</strong> {{ $product->stock }} sản phẩm</p>
+                @endif
+
+                {{-- Thương hiệu nếu có --}}
+                @php
+                    $brandNames = $product->brands
+                        ->filter(fn($brand) => $brand->parent)
+                        ->map(fn($brand) => $brand->name . ' (thuộc ' . $brand->parent->name . ')')
+                        ->unique();
+                @endphp
+                @if ($brandNames->isNotEmpty())
+                    <p style="font-size: 14px;"><strong>Tác giả:</strong> <span>{!! implode('<br>', $brandNames->toArray()) !!}</span></p>
+                @endif
             </div>
+
         </div>
 
         <ul class="tabs wc-tabs product-tabs small-nav-collapse nav nav-uppercase nav-line nav-left" role="tablist">
@@ -132,7 +195,7 @@
 @endsection
 <script>
     function changeImage(imageUrl) {
-        document.getElementById('mainImage').src = imageUrl;
+        document.getElementById('mainProductImage').src = imageUrl;
     }
 </script>
 <style>
@@ -362,6 +425,7 @@
     }
 </style>
 <script>
+
     document.addEventListener("DOMContentLoaded", function() {
         // Lấy tất cả các tab
         const tabs = document.querySelectorAll(".tabs.wc-tabs li a");

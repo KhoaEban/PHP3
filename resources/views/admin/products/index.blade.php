@@ -17,24 +17,24 @@
             <div class="">
                 <select>
                     <option>
-                        Bulk actions
+                        Thao tác
                     </option>
                 </select>
                 <button>
-                    Apply
+                    Áp dụng
                 </button>
                 <select>
                     <option>
-                        Select a category
+                        Chọn một danh mục
                     </option>
                 </select>
                 <select>
                     <option>
-                        Filter by brand
+                        Lọc theo thương hiệu
                     </option>
                 </select>
                 <button>
-                    Filter
+                    Lọc
                 </button>
             </div>
             <div class="">
@@ -73,7 +73,7 @@
                             Danh mục
                         </th>
                         <th>
-                            Thương hiệu
+                            Thương hiệu / Tác giả
                         </th>
                         <th>
                             Trạng thái
@@ -102,12 +102,21 @@
                                 </p>
                             </td>
                             <td class="status-in-stock">
-                                Còn hàng ({{ $product->stock }})
+                                @if ($product->variants->isNotEmpty())
+                                    Còn hàng ({{ $product->variants->sum('stock') }})
+                                @else
+                                    Còn hàng ({{ $product->stock }})
+                                @endif
                             </td>
+
                             <td>
-                                {{-- 30.000 VND – 35.000 VND --}}
-                                {{ number_format($product->price, 0, ',', '.') }} VND
+                                @if ($product->variants->isNotEmpty())
+                                    {{ number_format($product->variants->min('price'), 0, ',', '.') }} VNĐ
+                                @else
+                                    {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                @endif
                             </td>
+
                             <td>
                                 @if ($product->categories->isNotEmpty())
                                     <span
@@ -137,21 +146,42 @@
                                     class="badge text-muted text-wrap m-0 p-0">{{ $product->created_at->format('d/m/Y') }}</span>
                             </td>
                             <td class="action">
+                                <!-- Kiểm tra nếu sản phẩm chưa có biến thể -->
+                                @if ($product->variants)
+                                    <a href="{{ route('product_variants.create', $product->id) }}"
+                                        class="text-decoration-none">
+                                        <button type="button" class="btn btn-sm">
+                                            <i class="fas fa-plus" title="Thêm biến thể"></i>
+                                        </button>
+                                    </a>
+                                @endif
+                                @if ($product->variants->isNotEmpty())
+                                    <a href="{{ route('product_variants.index', $product->id) }}"
+                                        class="text-decoration-none">
+                                        <button type="button" class="btn btn-sm">
+                                            <i class="fas fa-eye" title="Xem biến thể"></i>
+                                        </button>
+                                    </a>
+                                @endif
+
+
                                 <a href="{{ route('products.edit', $product->id) }}"
                                     class="text-decoration-none text-dark">
-                                    <button type="button" class="btn btn-sm" style="background-color: #F0E68C">
-                                        <i class="fas fa-edit"></i>
-                                        Sửa
+                                    <button type="button" class="btn btn-sm">
+                                        <i class="fas fa-edit" title="Sửa"></i>
                                     </button>
                                 </a>
+
                                 <form action="{{ route('products.destroy', $product->id) }}" method="POST"
                                     class="delete-form d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-delete text-white"
-                                        style="background-color: #CD5C5C"><i class="fas fa-trash"></i> Xóa</button>
+                                    <button type="button" class="btn btn-sm btn-delete">
+                                        <i class="fas fa-trash" title="Xóa"></i>
+                                    </button>
                                 </form>
                             </td>
+
                         </tr>
                     @empty
                         <tr>

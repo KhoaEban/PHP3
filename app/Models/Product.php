@@ -10,7 +10,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'slug', 'description', 'price', 'stock', 'status', 'image'];
+    protected $fillable = ['title', 'slug', 'description', 'price', 'stock', 'status'];
 
     public function categories()
     {
@@ -22,11 +22,30 @@ class Product extends Model
         return $this->belongsToMany(Brand::class, 'product_brands');
     }
 
-
-    // Liên kết với nhiều hình ảnh
-    public function images()
+    public function variants()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasMany(ProductVariant::class);
+    }
+
+
+    public function getPriceAttribute()
+    {
+        if ($this->variants->isNotEmpty()) {
+            // Nếu có biến thể, lấy giá thấp nhất hoặc giá bạn mong muốn
+            return $this->variants->min('price');
+        }
+
+        return $this->attributes['price'];  // Giá sản phẩm chính
+    }
+
+    public function getQuantityAttribute()
+    {
+        if ($this->variants->isNotEmpty()) {
+            // Nếu có biến thể, bạn có thể tính tổng số lượng của các biến thể
+            return $this->variants->sum('stock');
+        }
+
+        return $this->attributes['stock'];  // Số lượng sản phẩm chính
     }
 
     // Tạo slug tự động khi lưu sản phẩm

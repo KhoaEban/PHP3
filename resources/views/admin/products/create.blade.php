@@ -47,12 +47,14 @@
                     <div class="mb-3">
                         <div class="row">
                             <div class="col-6">
-                                <label class="fw-bold">Giá:</label>
-                                <input type="number" name="price" class="form-control" required>
+                                <label for="price">Giá sản phẩm</label>
+                                <input type="number" name="price" class="form-control" value="{{ old('price') }}"
+                                    required>
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold">Số lượng:</label>
-                                <input type="number" name="stock" class="form-control" required>
+                                <label for="stock">Số lượng sản phẩm</label>
+                                <input type="number" name="stock" class="form-control" value="{{ old('stock') }}"
+                                    required>
                             </div>
                         </div>
                     </div>
@@ -72,8 +74,7 @@
                                 <input type="file" name="image" class="form-control" required>
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold">Hình ảnh phụ:</label>
-                                <input type="file" name="images[]" class="form-control" multiple>
+
                             </div>
                         </div>
                     </div>

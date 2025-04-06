@@ -50,14 +50,14 @@
                     <div class="mb-3">
                         <div class="row">
                             <div class="col-6">
-                                <label class="fw-bold">Giá:</label>
-                                <input type="number" name="price" class="form-control" value="{{ $product->price }}"
-                                    required>
+                                <label for="price">Giá sản phẩm</label>
+                                <input type="number" name="price" class="form-control"
+                                    value="{{ old('price', $product->price) }}" required>
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold">Số lượng:</label>
-                                <input type="number" name="stock" class="form-control" value="{{ $product->stock }}"
-                                    required>
+                                <label for="stock">Số lượng sản phẩm</label>
+                                <input type="number" name="stock" class="form-control"
+                                    value="{{ old('stock', $product->stock) }}" required>
                             </div>
                         </div>
                     </div>
@@ -73,24 +73,14 @@
                     <div class="mb-3">
                         <div class="row">
                             <div class="col-6">
-                                <label class="fw-bold">Hình ảnh hiện tại:</label>
+                                <label class="fw-bold">Hình ảnh chính hiện tại:</label>
                                 <div>
                                     <img src="{{ asset('storage/' . $product->image) }}" width="100">
                                 </div>
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold">Hình ảnh phụ:</label>
-                                <div class="d-flex">
-                                    @foreach ($product->images as $image)
-                                        <img src="{{ asset('storage/' . $image->image) }}" width="80" class="me-2">
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <label class="fw-bold">Hình ảnh mới:</label>
-                                <input type="file" name="images[]" class="form-control" multiple>
+                                <label class="fw-bold">Hình ảnh chính mới:</label>
+                                <input type="file" name="image" class="form-control">
                             </div>
                         </div>
                     </div>
