@@ -24,7 +24,7 @@
                                 <a class="nav-link" href="{{ route('products.index') }}">Tất cả sản phẩm</a>
                                 <a class="nav-link" href="{{ route('category.index') }}">Danh mục</a>
                                 <a class="nav-link" href="{{ route('brands.index') }}">Thương hiệu</a>
-                                {{-- <a class="nav-link" href="{{ route('product-type.index') }}">Loại sản phẩm</a> --}}
+                                <a class="nav-link" href="{{ route('discounts.index') }}">Mã giảm giá</a>
                             </nav>
                         </div>
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"

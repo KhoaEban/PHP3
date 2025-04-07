@@ -9,14 +9,7 @@ class CartItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['cart_id', 'product_id', 'quantity', 'price'];
-
-
-    // Tính tổng tiền của từng sản phẩm trong giỏ hàng
-    public function getTotalPriceAttribute()
-    {
-        return $this->quantity * $this->price;
-    }
+    protected $fillable = ['cart_id', 'product_id', 'variant_id', 'quantity', 'price'];
 
     // Liên kết với sản phẩm
     public function product()
@@ -24,9 +17,21 @@ class CartItem extends Model
         return $this->belongsTo(Product::class);
     }
 
+    // Liên kết với biến thể sản phẩm (nếu có)
+    public function variant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'variant_id');
+    }
+
     // Liên kết với giỏ hàng
     public function cart()
     {
         return $this->belongsTo(Cart::class);
+    }
+
+    // Tính tổng tiền của từng sản phẩm trong giỏ hàng
+    public function getTotalPriceAttribute()
+    {
+        return $this->quantity * $this->price;
     }
 }

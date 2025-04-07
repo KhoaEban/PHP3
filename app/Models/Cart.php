@@ -22,4 +22,16 @@ class Cart extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Tính tổng số lượng sản phẩm trong giỏ hàng
+    public function getTotalQuantityAttribute()
+    {
+        return $this->items->sum('quantity');
+    }
+
+    // Tính tổng giá tiền của giỏ hàng
+    public function getTotalPriceAttribute()
+    {
+        return $this->items->sum(fn($item) => $item->quantity * $item->price);
+    }
 }

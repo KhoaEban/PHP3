@@ -9,137 +9,159 @@
         <div class="product-details">
             <!-- Hình ảnh sản phẩm -->
             <div class="product-image">
-                <div class="row">
-                    <div class="col-12">
-                        <img id="mainProductImage" src="{{ asset('storage/' . $product->image) }}"
-                            alt="{{ $product->title }}" class="w-100">
-                    </div>
-                    <div class="col-12">
-                        <!-- Hình ảnh phụ -->
-                        <div class="product-thumbnails mt-3 mx-0">
-                            <div class="container py-0">
-                                <div class="row">
-                                    @foreach ($ProductVariants as $variant)
-                                        @foreach ($variantImages[$variant->id] as $image)
-                                            <div class="col-3">
-                                                <img src="{{ asset('storage/' . $image->image_path) }}"
-                                                    alt="Image for {{ $variant->variant_value }}"
-                                                    onclick="changeImage('{{ asset('storage/' . $image->image_path) }}')">
-                                            </div>
-                                        @endforeach
-                                    @endforeach
-                                </div>
-                            </div>
+                <img id="mainProductImage" src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->title }}"
+                    class="w-100" height="500">
+
+                <!-- Hình ảnh biến thể -->
+                <div class="product-thumbnails mt-3">
+                    <div class="container py-0" style="width: 500px; overflow-x: scroll;">
+                        <div id="variant-thumbnails" class="d-flex" style="width: max-content;">
+                            @foreach ($variantImages as $images)
+                                @foreach ($images as $image)
+                                    <div class="p-1">
+                                        <img class="variant-thumbnail" src="{{ asset('storage/' . $image->image_path) }}"
+                                            alt="Product Image" height="60px">
+                                    </div>
+                                @endforeach
+                            @endforeach
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="product-info">
-                <p>Sản phẩm / {{ $categoryName }} / {{ $product->title }}</p>
                 <h2>{{ $product->title }}</h2>
-
-                @if ($product->variants->isNotEmpty())
-                    @php
-                        $minPrice = $product->variants->min('price');
-                        $maxPrice = $product->variants->max('price');
-                    @endphp
-
-                    <div class="d-flex align-items-center gap-1">
-                        <p class="text-danger m-0 price">
-                            {{ number_format($minPrice, 0, ',', '.') }} VNĐ
-                        </p>
-                        @if ($minPrice !== $maxPrice)
-                            <span>-</span>
-                            <p class="text-danger m-0 price">
-                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ
-                            </p>
-                        @endif
-                    </div>
-
-                    {{-- Loại bìa --}}
-                    <div class="mb-3 mt-5 d-flex align-items-center gap-2">
-                        <span class="fw-bold">Bìa:</span>
-                        @foreach ($ProductVariants->unique('variant_type') as $variant)
-                            <button class="mx-1 variant-type-btn" type="button" data-type="{{ $variant->variant_type }}">
-                                <p class="m-0">{{ $variant->variant_type }}</p>
-                            </button>
-                        @endforeach
-                    </div>
-
-                    {{-- Loại giấy --}}
-                    <div class="mb-3">
-                        <span class="fw-bold">Loại giấy:</span>
-                        @foreach ($ProductVariants->unique('variant_value') as $variant)
-                            <button class="mx-1 variant-value-btn" type="button"
-                                data-value="{{ $variant->variant_value }}">
-                                <p class="m-0">{{ $variant->variant_value }}</p>
-                            </button>
-                        @endforeach
-                    </div>
-
-                    {{-- Giá & tồn kho cho biến thể đầu tiên (ví dụ minh họa) --}}
-                    @php $firstVariant = $ProductVariants->first(); @endphp
-
-                    <div class="d-flex gap-1 align-items-center mb-3">
-                        <span class="fw-bold">Giá:</span>
-                        <p class="m-0 text-danger">{{ number_format($firstVariant->price, 0, ',', '.') }} VNĐ</p>
-                    </div>
-
-                    @if ($firstVariant->stock < 10)
-                        <p class="text-warning fw-bold">⚠ Chỉ còn {{ $firstVariant->stock }} sản phẩm trong kho!</p>
-                    @endif
-
-                    {{-- Form thêm vào giỏ hàng --}}
-                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="addToCartForm">
-                        @csrf
-                        <div class="quantity-input mb-3 mt-2">
-                            <label for="quantity" class="fw-bold">Số lượng:</label>
-                            <input type="number" name="quantity" id="quantity" value="1" min="1"
-                                max="{{ $firstVariant->stock }}" class="form-control">
-                        </div>
-                        <button type="submit" class="bg-dark text-white py-2 px-3 mt-3 border-1">Thêm vào giỏ hàng</button>
-                        <p id="quantityError" class="text-danger mt-2" style="display: none;">Số lượng không hợp lệ!</p>
-                    </form>
-                    <p><strong>Số lượng có sẵn:</strong> {{ $firstVariant->stock }} sản phẩm</p>
-                @else
-                    {{-- KHÔNG CÓ BIẾN THỂ --}}
-                    <p class="text-danger text-start price">
-                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
-                    </p>
-
-                    {{-- Tồn kho sản phẩm --}}
-                    @if ($product->stock < 10)
-                        <p class="text-warning fw-bold">⚠ Chỉ còn {{ $product->stock }} sản phẩm trong kho!</p>
-                    @endif
-
-                    {{-- Form thêm vào giỏ hàng --}}
-                    <form action="{{ route('cart.add', $product->id) }}" method="POST" id="addToCartForm">
-                        @csrf
-                        <div class="quantity-input mb-3 mt-2">
-                            <label for="quantity" class="fw-bold">Số lượng:</label>
-                            <input type="number" name="quantity" id="quantity" value="1" min="1"
-                                max="{{ $product->stock }}" class="form-control">
-                        </div>
-                        <button type="submit" class="bg-dark text-white py-2 px-3 mt-3 border-1">Thêm vào giỏ hàng</button>
-                        <p id="quantityError" class="text-danger mt-2" style="display: none;">Số lượng không hợp lệ!</p>
-                    </form>
-                    <p><strong>Số lượng có sẵn:</strong> {{ $product->stock }} sản phẩm</p>
-                @endif
-
-                {{-- Thương hiệu nếu có --}}
                 @php
-                    $brandNames = $product->brands
-                        ->filter(fn($brand) => $brand->parent)
-                        ->map(fn($brand) => $brand->name . ' (thuộc ' . $brand->parent->name . ')')
-                        ->unique();
+                    // Kiểm tra nếu sản phẩm có biến thể
+                    $hasVariants = $product->variants->isNotEmpty();
+                    $minPrice = $hasVariants ? $product->variants->min('price') : $product->price;
+                    $maxPrice = $hasVariants ? $product->variants->max('price') : $product->price;
+                    $totalStock = $hasVariants ? $product->variants->sum('stock') : $product->stock;
                 @endphp
-                @if ($brandNames->isNotEmpty())
-                    <p style="font-size: 14px;"><strong>Tác giả:</strong> <span>{!! implode('<br>', $brandNames->toArray()) !!}</span></p>
-                @endif
-            </div>
 
+                <p class="text-danger price">
+                    <span id="price">
+                        {{ number_format($minPrice, 0, ',', '.') }}
+                        @if ($hasVariants && $minPrice !== $maxPrice)
+                            - {{ number_format($maxPrice, 0, ',', '.') }}
+                        @endif
+                    </span> VNĐ
+                </p>
+                <!-- Thương hiệu sản phẩm -->
+                @php
+                    $brandNames = $product->brands->pluck('name')->implode(', ');
+                @endphp
+                <p><strong>Thương hiệu:</strong> {{ $brandNames }}</p>
+                <p>{{ $product->description }}</p>
+                @if ($hasVariants)
+                    <label>Chọn biến thể:</label>
+                    <select id="variant-select">
+                        @foreach ($product->variants as $variant)
+                            <option value="{{ $variant->id }}" data-price="{{ $variant->price }}"
+                                data-stock="{{ $variant->stock }}"
+                                data-images="{{ json_encode($variantImages[$variant->id]->pluck('image_path')) }}">
+                                {{ $variant->variant_type }} - {{ $variant->variant_value }}
+                            </option>
+                        @endforeach
+                    </select>
+                @endif
+
+                <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" id="variant_id" name="variant_id">
+
+                    <label for="quantity">Số lượng:</label>
+                    <input type="number" name="quantity" id="quantity" value="1" min="1"
+                        max="{{ $totalStock }}" class="form-control">
+
+                    <button type="submit" class="btn btn-dark mt-3">🛒 Thêm vào giỏ hàng</button>
+                </form>
+
+                <p class="mt-3"><strong>Số lượng trong kho:</strong> <span id="stock">{{ $totalStock }}</span></p>
+                <!-- Script cập nhật hình ảnh -->
+                <script>
+                    document.getElementById('variant-select').addEventListener('change', function() {
+                        document.getElementById('variant_id').value = this.value;
+                        let selectedOption = this.options[this.selectedIndex];
+
+                        let formattedPrice = new Intl.NumberFormat('vi-VN').format(selectedOption.getAttribute('data-price'));
+
+                        document.getElementById('price').innerText = formattedPrice;
+                        document.getElementById('stock').innerText = selectedOption.getAttribute('data-stock');
+
+                        // Update main image
+                        let imagePaths = JSON.parse(selectedOption.getAttribute('data-images'));
+                        if (imagePaths.length > 0) {
+                            document.getElementById('mainProductImage').src = "/storage/" + imagePaths[0];
+                        }
+
+                        // Update thumbnails
+                        let thumbnailsContainer = document.getElementById('variant-thumbnails');
+                        thumbnailsContainer.innerHTML = "";
+
+                        // If a variant is selected, show only related images
+                        if (imagePaths.length > 0) {
+                            imagePaths.forEach(path => {
+                                let thumbnailDiv = document.createElement('div');
+                                thumbnailDiv.classList.add('p-1');
+
+                                let thumbnailImg = document.createElement('img');
+                                thumbnailImg.src = "/storage/" + path;
+                                thumbnailImg.alt = "Variant Image";
+                                thumbnailImg.height = 60;
+
+                                thumbnailDiv.appendChild(thumbnailImg);
+                                thumbnailsContainer.appendChild(thumbnailDiv);
+                            });
+                        } else {
+                            // If no variant is selected, show all images again
+                            variantImages.forEach(images => {
+                                images.forEach(image => {
+                                    let thumbnailDiv = document.createElement('div');
+                                    thumbnailDiv.classList.add('p-1');
+
+                                    let thumbnailImg = document.createElement('img');
+                                    thumbnailImg.src = "/storage/" + image.image_path;
+                                    thumbnailImg.alt = "Product Image";
+                                    thumbnailImg.height = 60;
+
+                                    thumbnailDiv.appendChild(thumbnailImg);
+                                    thumbnailsContainer.appendChild(thumbnailDiv);
+                                });
+                            });
+                        }
+                    });
+                    window.addEventListener('DOMContentLoaded', function() {
+                        let variantSelect = document.getElementById('variant-select');
+                        if (!variantSelect || variantSelect.options.length === 0) {
+                            let formattedPrice = new Intl.NumberFormat('vi-VN').format(document.getElementById('price')
+                                .innerText);
+                            document.getElementById('price').innerText = formattedPrice + " VNĐ";
+
+                            // Đảm bảo không có lỗi khi sản phẩm không có biến thể
+                            let thumbnailsContainer = document.getElementById('variant-thumbnails');
+                            thumbnailsContainer.innerHTML = "";
+                            variantImages.forEach(images => {
+                                images.forEach(image => {
+                                    let thumbnailDiv = document.createElement('div');
+                                    thumbnailDiv.classList.add('p-1');
+
+                                    let thumbnailImg = document.createElement('img');
+                                    thumbnailImg.src = "/storage/" + image.image_path;
+                                    thumbnailImg.alt = "Product Image";
+                                    thumbnailImg.height = 60;
+
+                                    thumbnailDiv.appendChild(thumbnailImg);
+                                    thumbnailsContainer.appendChild(thumbnailDiv);
+                                });
+                            });
+                        }
+                    });
+                </script>
+            </div>
         </div>
+
 
         <ul class="tabs wc-tabs product-tabs small-nav-collapse nav nav-uppercase nav-line nav-left" role="tablist">
             <li class="description_tab active" id="tab-title-description" role="presentation">
@@ -194,9 +216,46 @@
     </div>
 @endsection
 <script>
+    document.getElementById('variant-select').addEventListener('change', function() {
+        let selectedOption = this.options[this.selectedIndex];
+
+        document.getElementById('price').innerText = selectedOption.getAttribute('data-price') + " VNĐ";
+        document.getElementById('stock').innerText = selectedOption.getAttribute('data-stock');
+
+        let imagePath = selectedOption.getAttribute('data-image');
+        document.getElementById('mainProductImage').src = imagePath;
+    });
+
     function changeImage(imageUrl) {
         document.getElementById('mainProductImage').src = imageUrl;
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lấy tất cả các tab
+        const tabs = document.querySelectorAll(".tabs.wc-tabs li a");
+        const tabContents = document.querySelectorAll(".tab-pane");
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", function(e) {
+                e.preventDefault(); // Ngăn chặn chuyển trang
+
+                // Xóa class 'active' khỏi tất cả tab
+                tabs.forEach(t => t.parentElement.classList.remove("active"));
+
+                // Thêm class 'active' cho tab được click
+                this.parentElement.classList.add("active");
+
+                // Lấy ID nội dung tab tương ứng
+                const targetTab = this.getAttribute("href").substring(1);
+
+                // Ẩn tất cả nội dung tab
+                tabContents.forEach(content => content.classList.remove("active"));
+
+                // Hiển thị nội dung tab được chọn
+                document.getElementById(targetTab).classList.add("active");
+            });
+        });
+    });
 </script>
 <style>
     /* Tổng thể */
@@ -266,7 +325,6 @@
     .product-info {
         display: flex;
         flex-direction: column;
-        justify-content: center;
     }
 
     .product-info h2 {
@@ -424,32 +482,3 @@
         transform: translateY(-5px);
     }
 </style>
-<script>
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Lấy tất cả các tab
-        const tabs = document.querySelectorAll(".tabs.wc-tabs li a");
-        const tabContents = document.querySelectorAll(".tab-pane");
-
-        tabs.forEach(tab => {
-            tab.addEventListener("click", function(e) {
-                e.preventDefault(); // Ngăn chặn chuyển trang
-
-                // Xóa class 'active' khỏi tất cả tab
-                tabs.forEach(t => t.parentElement.classList.remove("active"));
-
-                // Thêm class 'active' cho tab được click
-                this.parentElement.classList.add("active");
-
-                // Lấy ID nội dung tab tương ứng
-                const targetTab = this.getAttribute("href").substring(1);
-
-                // Ẩn tất cả nội dung tab
-                tabContents.forEach(content => content.classList.remove("active"));
-
-                // Hiển thị nội dung tab được chọn
-                document.getElementById(targetTab).classList.add("active");
-            });
-        });
-    });
-</script>

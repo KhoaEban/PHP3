@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomersControllerAdmin;
 use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\Admin\DiscountController;
 
 // Route cho user
 use App\Http\Controllers\User\UserController;
@@ -52,6 +53,16 @@ Route::middleware(['check.role:admin'])->group(function () {
             Route::put('/variants/update/{variantId}', [ProductVariantController::class, 'update'])->name('product_variants.update');
             Route::delete('/variants/delete/{variantId}', [ProductVariantController::class, 'destroy'])->name('product_variants.destroy');
         });
+    });
+
+    // Route quản lý mã giảm giá trong Admin
+    Route::prefix('admin')->group(function () {
+        Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+        Route::get('/discounts/create', [DiscountController::class, 'create'])->name('discounts.create');
+        Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+        Route::get('/discounts/edit/{discount}', [DiscountController::class, 'edit'])->name('discounts.edit');
+        Route::put('/discounts/update/{discount}', [DiscountController::class, 'update'])->name('discounts.update');
+        Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
     });
 
     // Route quản lý danh mục trong Admin
@@ -102,9 +113,9 @@ Route::prefix('user')->group(function () {
     });
     Route::get('/get-variant-image', [ProductControllerUser::class, 'getVariantImage']);
 
-
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'showCart'])->name('cart.show');
+        Route::post('/add/{productId}', [CartController::class, 'addToCart'])->name('cart.add');
         Route::get('/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
         Route::post('/update', [CartController::class, 'updateCart'])->name('cart.update');
         Route::get('/total-items', [CartController::class, 'getTotalItems'])->name('cart.totalItems');

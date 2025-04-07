@@ -35,11 +35,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if ($cart->items->isEmpty())
-                                <tr>
-                                    <td colspan="5" class="text-center text-danger fw-bold">Giỏ hàng của bạn hiện đang trống.</td>
-                                </tr>
-                            @else
+                            @if (is_object($cart) && $cart->items->isNotEmpty())
                                 @foreach ($cart->items as $item)
                                     <tr>
                                         <td class="item-details">
@@ -58,7 +54,7 @@
                                             {{ number_format($item->product->price, 0, ',', '.') }} VNĐ
                                         </td>
                                         <td>
-                                            <input class="update-quantity" type="number" value="{{ $totalItems }}"
+                                            <input class="update-quantity" type="number" value="{{ $item->quantity }}"
                                                 min="1" data-item-id="{{ $item->id }}"
                                                 style="width: 50px; text-align: center; padding: 4px; border: 1px solid #ccc;">
                                         </td>
@@ -70,6 +66,11 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="5" class="text-center text-danger fw-bold">Giỏ hàng của bạn hiện đang
+                                        trống.</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>
@@ -78,9 +79,15 @@
 
             <div class="col-4">
                 <div class="summary">
-                    <div style="font-size: 1.25em; font-weight: bold;">
-                        {{ $cart->items->count() }} sản phẩm
-                    </div>
+                    @if (isset($cart) && is_object($cart) && $cart->items->isNotEmpty())
+                        <div style="font-size: 1.25em; font-weight: bold;">
+                            {{ $cart->items->count() }} sản phẩm
+                        </div>
+                    @else
+                        <div style="font-size: 1.25em; font-weight: bold;" class="text-danger">
+                            Giỏ hàng trống
+                        </div>
+                    @endif
                     <div class="divider-top"></div>
                     <div style="display: flex; justify-content: space-between;">
                         <div>Tổng phụ</div>

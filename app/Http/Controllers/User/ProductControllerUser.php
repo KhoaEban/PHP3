@@ -72,54 +72,33 @@ class ProductControllerUser extends Controller
 
     public function show($slug)
     {
-        // Tìm sản phẩm theo slug
-        $product = Product::where('slug', $slug)->firstOrFail();
+        // Lấy sản phẩm kèm biến thể & ảnh biến thể
+        $product = Product::where('slug', $slug)->with(['categories', 'brands', 'variants.images'])->firstOrFail();
 
-        // Lấy tất cả các biến thể của sản phẩm
-        $ProductVariants = $product->variants;
+        // Lấy danh mục & thương hiệu đầu tiên của sản phẩm
+        $categoryName = optional($product->categories->first())->name ?? 'Chưa có danh mục';
+        $brandName = optional($product->brands->first())->name ?? 'Chưa có tác giả';
 
-        // Lấy các ảnh phụ từ các biến thể
+        // Xử lý ảnh biến thể để hiển thị
         $variantImages = [];
-        foreach ($ProductVariants as $variant) {
-            $variantImages[$variant->id] = $variant->images; // Lưu các ảnh phụ theo ID biến thể
+        foreach ($product->variants as $variant) {
+            $variantImages[$variant->id] = $variant->images;
         }
 
-        // Lấy danh mục đầu tiên của sản phẩm (nếu có)
-        $category = $product->categories()->first();
-        $brand = $product->brands()->first();
-        $categoryName = $category ? $category->name : 'Chưa có danh mục';
-        $brandName = $brand ? $brand->name : 'Chưa có tác giả';
-
-        // Lấy các sản phẩm liên quan cùng danh mục
-        $relatedProducts = collect(); // Mặc định là rỗng nếu không có danh mục
-        if ($category) {
-            $relatedProducts = Product::whereHas('categories', function ($query) use ($category) {
-                $query->where('categories.id', $category->id);
+        // Lấy sản phẩm liên quan
+        $relatedProducts = Product::where('id', '!=', $product->id)
+            ->where(function ($query) use ($product) {
+                $query->whereHas('categories', function ($q) use ($product) {
+                    $q->whereIn('categories.id', $product->categories->pluck('id'));
+                })
+                    ->orWhereHas('brands', function ($q) use ($product) {
+                        $q->whereIn('brands.id', $product->brands->pluck('id'));
+                    });
             })
-                ->where('id', '!=', $product->id)
-                ->limit(4)
-                ->get();
-        }
+            ->limit(4)
+            ->get();
 
-        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName', 'ProductVariants', 'variantImages'));
-    }
-
-    public function getVariantImage(Request $request)
-    {
-        $type = $request->query('type');
-        $value = $request->query('value');
-
-        $variant = ProductVariant::where('variant_type', $type)
-            ->where('variant_value', $value)
-            ->first();
-
-        if ($variant && $variant->images->isNotEmpty()) {
-            return response()->json([
-                'image_url' => asset('storage/' . $variant->images->first()->image_path),
-            ]);
-        }
-
-        return response()->json(['image_url' => null]);
+        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName', 'variantImages'));
     }
 
     public function search(Request $request)
