@@ -10,7 +10,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'slug', 'description', 'price', 'stock', 'status'];
+    protected $fillable = ['title', 'slug', 'description', 'price', 'stock', 'status', 'image', 'discount_id'];
 
     public function categories()
     {
@@ -27,6 +27,22 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
+    }
+
+    public function getDiscountedPrice()
+    {
+        if ($this->discount) {
+            if ($this->discount->type === 'percentage') {
+                return $this->price - ($this->price * $this->discount->amount / 100);
+            } else {
+                return max(0, $this->price - $this->discount->amount);
+            }
+        }
+        return $this->price;
+    }
 
     public function getPriceAttribute()
     {

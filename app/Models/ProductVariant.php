@@ -20,7 +20,19 @@ class ProductVariant extends Model
 
     public function images()
     {
-        return $this->hasMany(ProductVariantImage::class , 'product_variant_id');
+        return $this->hasMany(ProductVariantImage::class, 'product_variant_id');
+    }
+
+    public function getDiscountedPrice()
+    {
+        if ($this->product->discount) {
+            if ($this->product->discount->type === 'percentage') {
+                return $this->price - ($this->price * $this->product->discount->amount / 100);
+            } else {
+                return max(0, $this->price - $this->product->discount->amount);
+            }
+        }
+        return $this->price;
     }
 
 

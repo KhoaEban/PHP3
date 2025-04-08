@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\Discount;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,8 @@ class ProductController extends Controller
         if (Auth::check() && Auth::user()->role !== 'admin') {
             return redirect('404')->with('error', 'Bạn không có quyền truy cập!');
         }
+
+        $discounts = Discount::all();
 
         $query = Product::with(['categories', 'brands', 'variants']);
 
@@ -33,7 +36,7 @@ class ProductController extends Controller
 
         $products = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'discounts'));
     }
 
 
@@ -149,6 +152,23 @@ class ProductController extends Controller
         }
 
         return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật.');
+    }
+
+    public function addDiscountPage(Product $product)
+    {
+        $discounts = Discount::all(); // Lấy danh sách tất cả mã giảm giá
+        return view('admin.products.add_discount', compact('product', 'discounts'));
+    }
+
+    public function applyDiscount(Request $request, Product $product)
+    {
+        $request->validate([
+            'discount_id' => 'required|exists:discounts,id',
+        ]);
+
+        $product->update(['discount_id' => $request->discount_id]);
+
+        return redirect()->route('products.index')->with('success', 'Mã giảm giá đã được áp dụng!');
     }
 
     public function destroy(Product $product)

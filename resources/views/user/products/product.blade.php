@@ -214,19 +214,51 @@
                                                 <h6 class="card-title text-start">{{ $product->title }}</h6>
 
                                                 @if ($product->variants->isNotEmpty())
-                                                    <!-- Nếu sản phẩm có biến thể -->
                                                     @php
                                                         $minPrice = $product->variants->min('price'); // Giá thấp nhất
                                                         $maxPrice = $product->variants->max('price'); // Giá cao nhất
+
+                                                        // Kiểm tra nếu có mã giảm giá
+                                                        if ($product->discount) {
+                                                            if ($product->discount->type === 'percentage') {
+                                                                $discountAmount = $product->discount->amount . '%';
+                                                                $discountedMinPrice =
+                                                                    $minPrice -
+                                                                    ($minPrice * $product->discount->amount) / 100;
+                                                                $discountedMaxPrice =
+                                                                    $maxPrice -
+                                                                    ($maxPrice * $product->discount->amount) / 100;
+                                                            } else {
+                                                                $discountAmount =
+                                                                    number_format(
+                                                                        $product->discount->amount,
+                                                                        0,
+                                                                        ',',
+                                                                        '.',
+                                                                    ) . ' VNĐ';
+                                                                $discountedMinPrice = max(
+                                                                    0,
+                                                                    $minPrice - $product->discount->amount,
+                                                                );
+                                                                $discountedMaxPrice = max(
+                                                                    0,
+                                                                    $maxPrice - $product->discount->amount,
+                                                                );
+                                                            }
+                                                        }
                                                     @endphp
 
-                                                    @if ($minPrice == $maxPrice)
-                                                        <!-- Nếu giá min và max bằng nhau (tức là chỉ có 1 biến thể) -->
-                                                        <p class="text-danger m-0">
-                                                            {{ number_format($minPrice, 0, ',', '.') }} VNĐ
+                                                    @if ($product->discount)
+                                                        <p class="text-muted m-0">
+                                                            <s>{{ number_format($minPrice, 0, ',', '.') }} VNĐ -
+                                                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ</s>
                                                         </p>
+                                                        <p class="text-danger fw-bold m-0">
+                                                            {{ number_format($discountedMinPrice, 0, ',', '.') }} VNĐ -
+                                                            {{ number_format($discountedMaxPrice, 0, ',', '.') }} VNĐ
+                                                        </p>
+                                                        <span class="badge bg-success">Giảm {{ $discountAmount }}</span>
                                                     @else
-                                                        <!-- Nếu có nhiều biến thể, hiển thị giá từ thấp nhất đến cao nhất -->
                                                         <div class="d-flex align-items-center gap-1">
                                                             <p class="text-danger m-0">
                                                                 {{ number_format($minPrice, 0, ',', '.') }} VNĐ
@@ -238,12 +270,46 @@
                                                         </div>
                                                     @endif
                                                 @else
-                                                    <!-- Nếu sản phẩm không có biến thể, hiển thị giá chính của sản phẩm -->
-                                                    <p class="text-danger text-start">
-                                                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
-                                                    </p>
+                                                    @php
+                                                        if ($product->discount) {
+                                                            if ($product->discount->type === 'percentage') {
+                                                                $discountAmount = $product->discount->amount . '%';
+                                                                $discountedPrice =
+                                                                    $product->price -
+                                                                    ($product->price * $product->discount->amount) /
+                                                                        100;
+                                                            } else {
+                                                                $discountAmount =
+                                                                    number_format(
+                                                                        $product->discount->amount,
+                                                                        0,
+                                                                        ',',
+                                                                        '.',
+                                                                    ) . ' VNĐ';
+                                                                $discountedPrice = max(
+                                                                    0,
+                                                                    $product->price - $product->discount->amount,
+                                                                );
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @if ($product->discount)
+                                                        <p class="text-muted m-0">
+                                                            <s>{{ number_format($product->price, 0, ',', '.') }} VNĐ</s>
+                                                        </p>
+                                                        <p class="text-danger fw-bold m-0">
+                                                            {{ number_format($discountedPrice, 0, ',', '.') }} VNĐ
+                                                        </p>
+                                                        <span class="badge bg-success">Giảm {{ $discountAmount }}</span>
+                                                    @else
+                                                        <p class="text-danger text-start">
+                                                            {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                                        </p>
+                                                    @endif
                                                 @endif
                                             </div>
+
                                         </a>
 
                                         @if ($product->brands->isNotEmpty())

@@ -52,6 +52,9 @@ Route::middleware(['check.role:admin'])->group(function () {
             Route::get('/variants/edit/{variantId}', [ProductVariantController::class, 'edit'])->name('product_variants.edit');
             Route::put('/variants/update/{variantId}', [ProductVariantController::class, 'update'])->name('product_variants.update');
             Route::delete('/variants/delete/{variantId}', [ProductVariantController::class, 'destroy'])->name('product_variants.destroy');
+            // Add mã giảm giá cho từng sản phẩm
+            Route::get('/{product}/add-discount', [ProductController::class, 'addDiscountPage'])->name('products.addDiscount');
+            Route::post('/{product}/apply-discount', [ProductController::class, 'applyDiscount'])->name('products.applyDiscount');
         });
     });
 

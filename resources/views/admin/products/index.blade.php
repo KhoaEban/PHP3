@@ -110,10 +110,20 @@
                             </td>
 
                             <td>
-                                @if ($product->variants->isNotEmpty())
-                                    {{ number_format($product->variants->min('price'), 0, ',', '.') }} VNĐ
+                                @if ($product->discount_id)
+                                    @if ($product->variants->isNotEmpty())
+                                        {{ number_format($product->variants->min->getDiscountedPrice(), 0, ',', '.') }} VNĐ
+                                        - {{ number_format($product->variants->min('price'), 0, ',', '.') }} VNĐ
+                                    @else
+                                        {{ number_format($product->getDiscountedPrice(), 0, ',', '.') }} VNĐ -
+                                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                    @endif
                                 @else
-                                    {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                    @if ($product->variants->isNotEmpty())
+                                        {{ number_format($product->variants->min('price'), 0, ',', '.') }} VNĐ
+                                    @else
+                                        {{ number_format($product->price, 0, ',', '.') }} VNĐ
+                                    @endif
                                 @endif
                             </td>
 
@@ -146,6 +156,11 @@
                                     class="badge text-muted text-wrap m-0 p-0">{{ $product->created_at->format('d/m/Y') }}</span>
                             </td>
                             <td class="action">
+                                <a href="{{ route('products.addDiscount', $product->id) }}" class="text-decoration-none">
+                                    <button type="button" class="btn btn-sm">
+                                        <i class="fa-solid fa-ticket-simple" title="Thêm mã giảm giá"></i>
+                                    </button>
+                                </a>
                                 <!-- Kiểm tra nếu sản phẩm chưa có biến thể -->
                                 @if ($product->variants)
                                     <a href="{{ route('product_variants.create', $product->id) }}"
