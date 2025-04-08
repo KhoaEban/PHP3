@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Discount;
 
 class CartController extends Controller
 {
@@ -64,22 +66,62 @@ class CartController extends Controller
         return redirect()->route('cart.show')->with('success', 'Sản phẩm đã được thêm vào giỏ hàng!');
     }
 
+    public function applyPromoCode(Request $request)
+    {
+        $request->validate([
+            'discount_code' => 'required|string|exists:discounts,code',
+        ]);
+
+        $discount = Discount::where('code', $request->discount_code)->first();
+
+        if (!$discount) {
+            return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ!');
+        }
+
+        // Cập nhật mã giảm giá cho từng sản phẩm trong giỏ hàng
+        $cart = Cart::where('user_id', Auth::id())->with('items.product')->first();
+
+        foreach ($cart->items as $item) {
+            if (!$item->product->discount_id) {
+                $item->product->update(['discount_id' => $discount->id]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Mã giảm giá đã được áp dụng!');
+    }
+
     public function showCart()
     {
         $user = Auth::user();
+        $cart = $user ? Cart::where('user_id', $user->id)->with('items.product.discount')->first() : null;
 
-        if ($user) {
-            // Lấy giỏ hàng từ database nếu user đã đăng nhập
-            $cart = Cart::where('user_id', $user->id)->with('items.product')->first();
-        } else {
-            // Nếu chưa đăng nhập, tạo giỏ hàng trống để tránh lỗi
+        if (!$cart) {
             $cart = new Cart();
-            $cart->items = collect(); // Đảm bảo `$cart->items` là một tập hợp trống
+            $cart->items = collect();
         }
 
-        $total = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+        $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+        $totalAfterDiscount = $totalBeforeDiscount;
+        $discountValue = 0;
+        $discountPercentage = 0;
 
-        return view('user.cart.show', compact('cart', 'total'));
+        foreach ($cart->items as $item) {
+            if ($item->product->discount) {
+                $discount = $item->product->discount;
+
+                $itemDiscount = ($discount->type === 'percentage')
+                    ? ($item->quantity * $item->product->price * $discount->amount / 100)
+                    : min($discount->amount, $item->quantity * $item->product->price);
+
+                $discountValue += $itemDiscount;
+                $totalAfterDiscount -= $itemDiscount;
+
+                // Cập nhật phần trăm giảm giá (dùng cho hiển thị)
+                $discountPercentage = ($discount->type === 'percentage') ? $discount->amount : (($discountValue / $totalBeforeDiscount) * 100);
+            }
+        }
+
+        return view('user.cart.show', compact('cart', 'totalBeforeDiscount', 'totalAfterDiscount', 'discountValue', 'discountPercentage'));
     }
 
     public function updateCart(Request $request)

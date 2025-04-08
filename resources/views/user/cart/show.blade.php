@@ -4,16 +4,16 @@
     <div class="container mt-4">
         <h1 class="text-center fw-bold">Giỏ hàng</h1>
         <div class="promo-code">
-            <label for="promo-code">
-                Nhập mã khuyến mại
-            </label>
-            <div style="display: flex;">
-                <input id="promo-code" placeholder="Nhận mã khuyến mãi..." type="text" />
-                <button>
-                    Áp dụng
-                </button>
-            </div>
+            <form action="{{ route('cart.applyPromoCode') }}" method="POST">
+                @csrf
+                <label for="promo-code">Nhập mã giảm giá cho sản phẩm</label>
+                <div style="display: flex;">
+                    <input name="discount_code" placeholder="Nhập mã giảm giá..." type="text" required />
+                    <button type="submit">Áp dụng</button>
+                </div>
+            </form>
         </div>
+
         <div class="row">
             <div class="col-8">
                 <div style="overflow-x: auto;">
@@ -89,21 +89,44 @@
                         </div>
                     @endif
                     <div class="divider-top"></div>
+
+                    <!-- Hiển thị tổng giá gốc -->
                     <div style="display: flex; justify-content: space-between;">
                         <div>Tổng phụ</div>
-                        <div>{{ number_format($total, 0, ',', '.') }} VNĐ</div>
+                        <div class="text-muted">
+                            {{ number_format($totalBeforeDiscount, 0, ',', '.') }} VNĐ
+                        </div>
                     </div>
+
+                    <!-- Kiểm tra nếu có mã giảm giá -->
+                    @if ($discountValue > 0)
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>Giảm giá ({{ round($discountPercentage, 2) }}%)</div>
+                            <div class="text-success">
+                                - {{ number_format($discountValue, 0, ',', '.') }} VNĐ
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="divider-top"></div>
+
                     <div>
                         <select>
                             <option>Chọn phương thức giao hàng</option>
                         </select>
                     </div>
-                    <div class="divider-bottom"></div>
+
+                    <div class="divider-top"></div>
                     <br>
+
+                    <!-- Tổng tiền sau khi giảm -->
                     <div style="display: flex; justify-content: space-between; font-weight: bold;">
                         <div>TỔNG</div>
-                        <div>{{ number_format($total, 0, ',', '.') }} VNĐ</div>
+                        <div class="text-danger fw-bold">
+                            {{ number_format($totalAfterDiscount, 0, ',', '.') }} VNĐ
+                        </div>
                     </div>
+
                     <button>THANH TOÁN</button>
                 </div>
             </div>
@@ -113,6 +136,33 @@
 
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("applyDiscountBtn").addEventListener("click", function() {
+            let discountCode = document.getElementById("promo-code").value;
+
+            fetch("{{ route('cart.applyPromoCode') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        discount_code: discountCode
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Lỗi: " + data.message);
+                    }
+                })
+                .catch(error => console.error("Lỗi:", error));
+        });
+    });
+
+
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".update-quantity").forEach(input => {
             input.addEventListener("change", function() {

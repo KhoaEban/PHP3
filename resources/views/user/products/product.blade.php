@@ -205,12 +205,29 @@
                                     <div class="card h-100 shadow-sm">
                                         <a href="{{ route('user.products.show', $product->slug) }}"
                                             class="text-decoration-none text-dark">
-                                            <div class="card-img">
+                                            <div class="card-img position-relative">
+                                                @if ($product->discount)
+                                                    @php
+                                                        if ($product->discount->type === 'percentage') {
+                                                            $discountAmount = $product->discount->amount . '%';
+                                                        } else {
+                                                            $discountAmount =
+                                                                number_format($product->discount->amount, 0, ',', '.') .
+                                                                ' VNĐ';
+                                                        }
+                                                    @endphp
+                                                    <span
+                                                        class="badge bg-danger position-absolute top-0 start-0 px-2 py-1">
+                                                        Giảm {{ $discountAmount }}
+                                                    </span>
+                                                @endif
+
                                                 <img class="card-img-top lazyload"
                                                     src="{{ asset('storage/' . $product->image) }}"
                                                     alt="{{ $product->title }}" loading="lazy">
                                             </div>
-                                            <div class="card-body text-center">
+
+                                            <div class="card-body">
                                                 <h6 class="card-title text-start">{{ $product->title }}</h6>
 
                                                 @if ($product->variants->isNotEmpty())
@@ -249,15 +266,15 @@
                                                     @endphp
 
                                                     @if ($product->discount)
-                                                        <p class="text-muted m-0">
-                                                            <s>{{ number_format($minPrice, 0, ',', '.') }} VNĐ -
-                                                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ</s>
-                                                        </p>
-                                                        <p class="text-danger fw-bold m-0">
-                                                            {{ number_format($discountedMinPrice, 0, ',', '.') }} VNĐ -
-                                                            {{ number_format($discountedMaxPrice, 0, ',', '.') }} VNĐ
-                                                        </p>
-                                                        <span class="badge bg-success">Giảm {{ $discountAmount }}</span>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <p class="text-danger fw-bold m-0">
+                                                                {{ number_format($discountedMinPrice, 0, ',', '.') }} VNĐ
+                                                            </p>
+                                                            -
+                                                            <p class="text-muted m-0">
+                                                                {{ number_format($maxPrice, 0, ',', '.') }} VNĐ
+                                                            </p>
+                                                        </div>
                                                     @else
                                                         <div class="d-flex align-items-center gap-1">
                                                             <p class="text-danger m-0">
@@ -295,13 +312,16 @@
                                                     @endphp
 
                                                     @if ($product->discount)
-                                                        <p class="text-muted m-0">
-                                                            <s>{{ number_format($product->price, 0, ',', '.') }} VNĐ</s>
-                                                        </p>
-                                                        <p class="text-danger fw-bold m-0">
-                                                            {{ number_format($discountedPrice, 0, ',', '.') }} VNĐ
-                                                        </p>
-                                                        <span class="badge bg-success">Giảm {{ $discountAmount }}</span>
+                                                        <div class="d-flex align-items-center gap-1">
+                                                            <p class="text-danger fw-bold m-0">
+                                                                {{ number_format($discountedPrice, 0, ',', '.') }} VNĐ
+                                                            </p>
+                                                            -
+                                                            <p class="text-muted m-0">
+                                                                <s>{{ number_format($product->price, 0, ',', '.') }}
+                                                                    VNĐ</s>
+                                                            </p>
+                                                        </div>
                                                     @else
                                                         <p class="text-danger text-start">
                                                             {{ number_format($product->price, 0, ',', '.') }} VNĐ
