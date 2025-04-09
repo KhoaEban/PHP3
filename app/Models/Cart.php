@@ -34,4 +34,5 @@ class Cart extends Model
     {
         return $this->items->sum(fn($item) => $item->quantity * $item->price);
     }
+    
 }

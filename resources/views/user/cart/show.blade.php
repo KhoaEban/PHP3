@@ -3,17 +3,6 @@
 @section('content')
     <div class="container mt-4">
         <h1 class="text-center fw-bold">Giỏ hàng</h1>
-        <div class="promo-code">
-            <form action="{{ route('cart.applyPromoCode') }}" method="POST">
-                @csrf
-                <label for="promo-code">Nhập mã giảm giá cho sản phẩm</label>
-                <div style="display: flex;">
-                    <input name="discount_code" placeholder="Nhập mã giảm giá..." type="text" required />
-                    <button type="submit">Áp dụng</button>
-                </div>
-            </form>
-        </div>
-
         <div class="row">
             <div class="col-8">
                 <div style="overflow-x: auto;">
@@ -43,7 +32,10 @@
                                                 src="{{ asset('storage/' . $item->product->image) }}" width="50" />
                                             <div class="mx-2">
                                                 <div style="font-weight: bold;">
-                                                    {{ $item->quantity }} x {{ $item->product->title }}
+                                                    {{ $item->quantity }} x {{ $item->product->title }} x
+                                                    @if ($item->variant_id && $item->variant)
+                                                        {{ $item->variant->variant_type }} x {{ $item->variant->variant_value }}
+                                                    @endif
                                                 </div>
                                                 <div style="color: #666;">
                                                     Mã sản phẩm: {{ $item->product->id }}
@@ -109,14 +101,6 @@
                     @endif
 
                     <div class="divider-top"></div>
-
-                    <div>
-                        <select>
-                            <option>Chọn phương thức giao hàng</option>
-                        </select>
-                    </div>
-
-                    <div class="divider-top"></div>
                     <br>
 
                     <!-- Tổng tiền sau khi giảm -->
@@ -127,7 +111,20 @@
                         </div>
                     </div>
 
-                    <button>THANH TOÁN</button>
+                    <!-- Nút chuyển đến trang chi tiết thanh toán -->
+                    <a href="{{ route('checkout.show') }}" class="bg-dark text-white d-block text-center py-2">TIẾN HÀNH
+                        THANH TOÁN</a>
+
+                    <div class="promo-code mt-3">
+                        <form action="{{ route('cart.applyPromoCode') }}" method="POST">
+                            @csrf
+                            <label for="promo-code"><i class="fas fa-tags"></i> Mã ưu đãi</label>
+                            <div class="d-flex flex-column gap-2">
+                                <input name="discount_code" placeholder="Nhập mã ưu đãi..." type="text" required />
+                                <button class="m-0" type="submit">Áp dụng</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -296,5 +293,3 @@
         margin: 16px 0;
     }
 </style>
-
-<script></script>

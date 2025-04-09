@@ -99,6 +99,14 @@ class CartController extends Controller
             $cart = new Cart();
             $cart->items = collect();
         }
+        
+        $totalBeforeDiscount = 0;
+        $totalAfterDiscount = 0;
+        $discountValue = 0;
+        $discountPercentage = 0;
+        if ($cart->items->isEmpty()) {
+            return view('user.cart.show', compact('cart', 'totalBeforeDiscount', 'totalAfterDiscount', 'discountValue', 'discountPercentage'));
+        }
 
         $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
         $totalAfterDiscount = $totalBeforeDiscount;

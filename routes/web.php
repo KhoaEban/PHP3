@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+
 // Route cho admin
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ProductController;
@@ -14,11 +15,14 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CustomersControllerAdmin;
 use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\DiscountController;
+use App\Http\Controllers\Admin\AdminOrderController;
 
 // Route cho user
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\ProductControllerUser;
 use App\Http\Controllers\User\CartController;
+use App\Http\Controllers\CheckoutController;
+
 
 // Route::get('/admin/dashboard', function () {
 //     return view('admin.dashboard');
@@ -103,6 +107,14 @@ Route::middleware(['check.role:admin'])->group(function () {
         Route::put('/customers/update/{id}', [CustomersControllerAdmin::class, 'update'])->name('customers.update');
         Route::delete('/customers/{id}', [CustomersControllerAdmin::class, 'destroy'])->name('customers.destroy');
     });
+
+    // Route quản lý đơn hàng trong Admin
+    Route::prefix('admin')->group(function () {
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+        Route::post('/orders/{order}/update-status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    });
 });
 
 // Route cho user
@@ -124,6 +136,11 @@ Route::prefix('user')->group(function () {
         Route::get('/total-items', [CartController::class, 'getTotalItems'])->name('cart.totalItems');
         Route::post('/cart/apply-promo', [CartController::class, 'applyPromoCode'])->name('cart.applyPromoCode');
     });
+
+    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/failed', [CheckoutController::class, 'failed'])->name('checkout.failed');
 
     Route::prefix('profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
@@ -158,6 +175,7 @@ Route::prefix('user')->group(function () {
         return view('user.about', $data);
     })->name('about');
 });
+Route::get('/checkout/vnpay/callback', [CheckoutController::class, 'vnpayCallback'])->name('checkout.vnpay.callback');
 
 
 // Xử lý đăng ký & đăng nhập
