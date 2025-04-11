@@ -32,6 +32,11 @@ class Product extends Model
         return $this->belongsTo(Discount::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function getDiscountedPrice()
     {
         if ($this->discount) {

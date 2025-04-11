@@ -150,6 +150,11 @@ Route::prefix('user')->group(function () {
         Route::post('/update-bio', [UserController::class, 'updateProfileBio'])->name('user.updateBio');
         Route::get('/change-password', [UserController::class, 'changePassword'])->name('user.password.edit');
         Route::post('/update-password', [UserController::class, 'updateProfilePassword'])->name('user.updatePassword');
+
+        // Xem chi tiết đơn hàng
+        Route::get('/details/{order_id}', [UserController::class, 'orderDetails'])->name('user.order.details');
+        Route::post('/orders/{order_id}/review', [UserController::class, 'storeReview'])->name('user.order.review');
+        Route::get('/orders/{order_id}/review/filter/{rating}', [UserController::class, 'filterReviews'])->name('user.order.reviews.filter');
     });
 
     // Tìm kiếm sản phẩm

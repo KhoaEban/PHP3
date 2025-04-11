@@ -23,6 +23,11 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantImage::class, 'product_variant_id');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function getDiscountedPrice()
     {
         if ($this->product->discount) {

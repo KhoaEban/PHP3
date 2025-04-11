@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -73,7 +75,33 @@ class ProductControllerUser extends Controller
     public function show($slug)
     {
         // Lấy sản phẩm kèm biến thể & ảnh biến thể
-        $product = Product::where('slug', $slug)->with(['categories', 'brands', 'variants.images'])->firstOrFail();
+        $product = Product::where('slug', $slug)
+            ->with(['categories', 'brands', 'variants.images'])
+            ->firstOrFail();
+
+        // Ghi lại sản phẩm đã xem
+        if (Auth::check()) {
+            $user = Auth::user();
+            $exists = $user->viewedProducts()->where('product_id', $product->id)->exists();
+            if (!$exists) {
+                $user->viewedProducts()->create(['product_id' => $product->id]);
+            } else {
+                $user->viewedProducts()->where('product_id', $product->id)->update(['updated_at' => now()]);
+            }
+            $viewedCount = $user->viewedProducts()->count();
+            if ($viewedCount > 10) {
+                $user->viewedProducts()->orderBy('updated_at', 'asc')->first()->delete();
+            }
+        } else {
+            $viewed = session()->get('viewed_products', []);
+            if (!in_array($product->id, $viewed)) {
+                array_unshift($viewed, $product->id);
+                if (count($viewed) > 10) {
+                    array_pop($viewed);
+                }
+                session()->put('viewed_products', $viewed);
+            }
+        }
 
         // Lấy danh mục & thương hiệu đầu tiên của sản phẩm
         $categoryName = optional($product->categories->first())->name ?? 'Chưa có danh mục';

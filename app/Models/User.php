@@ -22,12 +22,30 @@ class User extends Authenticatable
         'description',
     ];
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function viewedProducts()
+    {
+        return $this->hasMany(ViewedProduct::class)
+            ->with('product')
+            ->orderBy('updated_at', 'desc')
+            ->limit(10);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    
+
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
@@ -40,5 +58,12 @@ class User extends Authenticatable
     public function isUser()
     {
         return $this->role === 'user';
+    }
+
+    protected $appends = ['avatar'];
+
+    public function getAvatarAttribute()
+    {
+        return $this->attributes['avatar'] ?? 'default-avatar.jpg';
     }
 }

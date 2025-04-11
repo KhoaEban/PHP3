@@ -19,58 +19,128 @@
                                 {{ $user->role == 'admin' ? 'Quản trị viên' : 'Người dùng' }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="joined"><i class="fas fa-calendar-alt"></i> 
-                                Tham gia từ: 
+                            <p class="joined mt-3"><i class="fas fa-calendar-alt"></i>
+                                Tham gia từ:
                                 {{ $user->created_at->format('d/m/Y') }}</p>
-                                {{ $user->created_at->diffForHumans() }}</p>
+                            {{ $user->created_at->diffForHumans() }}</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-8">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 mb-5">
+                        <!-- Sản phẩm đã xem -->
                         <div class="courses">
-                            <div class="header">
-                                <p>Sản phẩm đã xem (0)</p>
+                            <div class="header mb-3">
+                                <p>Sản phẩm đã xem ({{ $viewedProducts->count() }})</p>
                             </div>
-                            <div class="grid">
-                                {{-- Hiển thị sản phẩm đã xem nếu có --}}
-                                @forelse($user->viewedProducts ?? [] as $product)
-                                    <div class="course-card">
-                                        <img src="{{ $product->image }}" alt="{{ $product->name }}">
-                                        <div class="content">
-                                            <p class="title">{{ $product->name }}</p>
-                                            <p class="price">{{ $product->price }} VNĐ</p>
-                                        </div>
-                                    </div>
-                                @empty
-                                    <p>Chưa có sản phẩm nào đã xem.</p>
-                                @endforelse
-                            </div>
-                        </div>
-                        <div class="col-12 p-0">
-                            <div class="courses">
-                                <div class="header">
-                                    <p>Sản phẩm đã mua (0)</p>
-                                </div>
-                                <div class="grid">
-                                    @forelse($user->purchasedProducts ?? [] as $product)
-                                        <div class="course-card">
-                                            <img src="https://placehold.co/300x200" alt="React JS course image">
-                                            <div class="content">
-                                                <p class="title">React JS course</p>
-                                                <p class="price">150.000 VNĐ</p>
-                                                <div class="info">
-                                                    <i class="fas fa-user"></i> Tác giả: Nguyễn Văn A
-                                                    <i class="fas fa-folder"></i> Danh mục: Sách lập trình
+                            <div class="swiper viewed-products-swiper">
+                                <div class="swiper-wrapper">
+                                    @forelse($viewedProducts as $product)
+                                        <div class="swiper-slide">
+                                            <div class="course-card">
+                                                <img class="card-img-top lazyload"
+                                                    src="{{ $product->image ? asset('storage/' . $product->image) : 'https://placehold.co/300x200' }}"
+                                                    alt="{{ $product->title }}"
+                                                    onError="this.src='https://placehold.co/300x200'">
+                                                <div class="content">
+                                                    <p class="title">{{ $product->title }}</p>
+                                                    <p class="price">{{ number_format($product->getDiscountedPrice()) }}
+                                                        VNĐ</p>
                                                 </div>
                                             </div>
                                         </div>
                                     @empty
+                                        <p>Chưa có sản phẩm nào đã xem.</p>
+                                    @endforelse
+                                </div>
+                                <!-- Nút điều hướng -->
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+                                <!-- Thanh cuộn (scrollbar) - tùy chọn -->
+                                <div class="swiper-scrollbar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Sản phẩm đã mua -->
+                    </div>
+                    <div class="col-12 mt-5">
+                        <div class="courses">
+                            <div class="header mb-3">
+                                <p>Sản phẩm đã mua ({{ $orders->flatMap->items->count() }})</p>
+                            </div>
+                            <div class="swiper purchased-products-swiper">
+                                <div class="swiper-wrapper">
+                                    @forelse($orders as $order)
+                                        @foreach ($order->items as $item)
+                                            <div class="swiper-slide">
+                                                <div class="course-card">
+                                                    @if ($item->variant)
+                                                        <a href="{{ route('user.order.details', $order->id) }}">
+                                                            <!-- Hiển thị thông tin biến thể -->
+                                                            <img src="{{ $item->variant->images->isNotEmpty() ? asset('storage/' . $item->variant->images->first()->image_path) : 'https://placehold.co/300x200' }}"
+                                                                alt="{{ $item->product->title }} - {{ $item->variant->variant_value }}"
+                                                                onError="this.src='https://placehold.co/300x200'">
+                                                            <div class="content">
+                                                                <p class="title">
+                                                                    {{ $item->product->title }}
+                                                                    ({{ $item->variant->variant_type }}:
+                                                                    {{ $item->variant->variant_value }})
+                                                                </p>
+                                                                <p class="price">
+                                                                    {{ number_format($item->variant->getDiscountedPrice()) }}
+                                                                    VNĐ
+                                                                    @if ($item->variant->getDiscountedPrice() < $item->variant->price)
+                                                                        <del class="text-muted">{{ number_format($item->variant->price) }}
+                                                                            VNĐ</del>
+                                                                    @endif
+                                                                </p>
+                                                                <div class="info">
+                                                                    <i class="fas fa-user"></i> Thương hiệu:
+                                                                    {{ $item->product->brands->first()->name ?? 'Chưa xác định' }}
+                                                                    <i class="fas fa-folder"></i> Danh mục:
+                                                                    {{ $item->product->categories->first()->name ?? 'Chưa xác định' }}
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('user.order.details', $order->id) }}">
+                                                            <!-- Hiển thị thông tin sản phẩm chính -->
+                                                            <img src="{{ $product->image ? asset('storage/' . $item->product->image) : 'https://placehold.co/300x200' }}"
+                                                                alt="{{ $item->product->title }}"
+                                                                onError="this.src='https://placehold.co/300x200'">
+                                                            <div class="content">
+                                                                <p class="title">{{ $item->product->title }}</p>
+                                                                <p class="price">
+                                                                    {{ number_format($item->product->getDiscountedPrice()) }}
+                                                                    VNĐ
+                                                                    @if ($item->product->getDiscountedPrice() < $item->product->price)
+                                                                        <del class="text-muted">{{ number_format($item->product->price) }}
+                                                                            VNĐ</del>
+                                                                    @endif
+                                                                </p>
+                                                                <div class="info">
+                                                                    <i class="fas fa-user"></i> Thương hiệu:
+                                                                    {{ $item->product->brands->first()->name ?? 'Chưa xác định' }}
+                                                                    <i class="fas fa-folder"></i> Danh mục:
+                                                                    {{ $item->product->categories->first()->name ?? 'Chưa xác định' }}
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @empty
                                         <p>Chưa có sản phẩm nào được mua.</p>
                                     @endforelse
                                 </div>
+                                <!-- Nút điều hướng -->
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+                                <!-- Thanh cuộn (scrollbar) - tùy chọn -->
+                                <div class="swiper-scrollbar"></div>
                             </div>
                         </div>
                     </div>
@@ -78,6 +148,76 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Khởi tạo Swiper cho Sản phẩm đã xem
+        new Swiper('.viewed-products-swiper', {
+            slidesPerView: 4, // Mặc định hiển thị 4 sản phẩm
+            spaceBetween: 20, // Khoảng cách giữa các slide
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            scrollbar: {
+                el: '.swiper-scrollbar',
+                draggable: true,
+            },
+            breakpoints: {
+                // Mobile nhỏ (< 576px)
+                320: {
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                },
+                // Mobile lớn (576px - 768px)
+                576: {
+                    slidesPerView: 2,
+                    spaceBetween: 15,
+                },
+                // Tablet (768px - 992px)
+                768: {
+                    slidesPerView: 3,
+                    spaceBetween: 15,
+                },
+                // Desktop (>= 992px)
+                992: {
+                    slidesPerView: 4,
+                    spaceBetween: 20,
+                },
+            },
+        });
+
+        // Khởi tạo Swiper cho Sản phẩm đã mua
+        new Swiper('.purchased-products-swiper', {
+            slidesPerView: 4,
+            spaceBetween: 20,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            scrollbar: {
+                el: '.swiper-scrollbar',
+                draggable: true,
+            },
+            breakpoints: {
+                320: {
+                    slidesPerView: 1,
+                    spaceBetween: 10,
+                },
+                576: {
+                    slidesPerView: 2,
+                    spaceBetween: 15,
+                },
+                768: {
+                    slidesPerView: 3,
+                    spaceBetween: 15,
+                },
+                992: {
+                    slidesPerView: 4,
+                    spaceBetween: 20,
+                },
+            },
+        });
+    </script>
 @endsection
 
 <style>
@@ -197,6 +337,7 @@
     }
 
     .courses {
+        height: 350px;
         margin-top: 32px;
     }
 
@@ -281,5 +422,59 @@
 
     .course-card .content .info i+span {
         margin-left: 16px;
+    }
+
+    /* Container cho Swiper */
+    .courses .swiper {
+        position: relative;
+        padding-bottom: 30px;
+        /* Không gian cho scrollbar */
+    }
+
+    /* Đảm bảo course-card đầy đủ chiều rộng trong slide */
+    .courses .swiper-slide .course-card {
+        width: 100%;
+        height: 350px;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    /* Tùy chỉnh nút điều hướng */
+    .swiper-button-prev,
+    .swiper-button-next {
+        color: #333;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+
+    .swiper-button-prev:hover,
+    .swiper-button-next:hover {}
+
+    /* Tùy chỉnh scrollbar */
+    .swiper-scrollbar {
+        background: #e0e0e0;
+        height: 5px;
+    }
+
+    .swiper-scrollbar-drag {
+        background: #007bff;
+        cursor: grab;
+    }
+
+    /* Responsive cho course-card */
+    @media (max-width: 576px) {
+        .course-card {
+            padding: 10px;
+        }
+
+        .course-card img {
+            max-height: 150px;
+            object-fit: cover;
+        }
     }
 </style>
