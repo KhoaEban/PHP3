@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
 use App\Models\Order;      // Model đơn hàng của bạn
 use App\Models\OrderItem;  // Model chi tiết đơn hàng
 use App\Models\Cart;       // Giả sử bạn lưu giỏ hàng của user
@@ -23,7 +24,6 @@ class CheckoutController extends Controller
             return redirect()->route('cart.show')->with('error', 'Giỏ hàng của bạn đang trống.');
         }
 
-        // Tính toán tổng giá, giảm giá, ...
         $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
         $discountValue = 0;
         $discountPercentage = 0;
@@ -39,10 +39,8 @@ class CheckoutController extends Controller
         }
         $totalAfterDiscount = $totalBeforeDiscount - $discountValue;
 
-        // Tạo mã đơn hàng đơn giản (có thể thay bằng auto-increment hoặc UUID)
         $orderId = time();
 
-        // Truyền dữ liệu xuống view để hiển thị
         return view('user.checkout.show', compact(
             'cart',
             'totalBeforeDiscount',
@@ -53,16 +51,13 @@ class CheckoutController extends Controller
         ));
     }
 
-    /**
-     * Xử lý đặt hàng sau khi người dùng nhấn "ĐẶT HÀNG"
-     */
     public function confirm(Request $request)
     {
         $request->validate([
             'name'           => 'required|string|max:255',
             'phone'          => 'required|string|max:20',
             'address'        => 'required|string|max:500',
-            'payment_method' => 'required|in:cod,vnpay',
+            'payment_method' => 'required|in:cod,vnpay,momo', // Ensure 'momo' is here
         ]);
 
         $user = Auth::user();
@@ -96,10 +91,9 @@ class CheckoutController extends Controller
             'phone'      => $request->phone,
             'address'    => $request->address,
             'total'      => $totalAfterDiscount,
-            'payment_method' => $request->payment_method,
+            'payment_method' => $request->payment_method, // 'momo' is passed here
             'status'     => $request->payment_method === 'cod' ? 'pending' : 'unpaid',
         ]);
-        Log::info('Đơn hàng đã tạo trước khi redirect VNPay', ['order' => $order]);
 
         foreach ($cart->items as $item) {
             OrderItem::create([
@@ -111,13 +105,18 @@ class CheckoutController extends Controller
             ]);
         }
 
-        // Xoá giỏ hàng
+        // Xử lý MoMo
+        if ($request->payment_method === 'momo') {
+            // Không xóa giỏ hàng ở đây, để MoMo callback xử lý
+            return redirect()->route('momo.payment', ['amount' => $totalAfterDiscount, 'order_id' => $order->id]);
+        }
+
+        // Xoá giỏ hàng cho COD và VNPay
         $cart->items()->delete();
         $cart->delete();
 
-        // Gộp luôn xử lý VNPay tại đây
+        // Xử lý VNPay
         if ($request->payment_method === 'vnpay') {
-
             $vnp_TmnCode = config('vnpay.tmn_code');
             $vnp_HashSecret = config('vnpay.hash_secret');
             $vnp_Url = config('vnpay.url');
@@ -161,10 +160,9 @@ class CheckoutController extends Controller
             return redirect()->away($paymentUrl);
         }
 
-        // COD
+        // Xử lý COD
         if ($request->payment_method === 'cod') {
             foreach ($order->items as $item) {
-                // Nếu có biến thể thì ưu tiên trừ tồn kho biến thể
                 if ($item->variant_id && $item->variant) {
                     if ($item->variant->stock >= $item->quantity) {
                         $item->variant->decrement('stock', $item->quantity);
@@ -172,9 +170,7 @@ class CheckoutController extends Controller
                     } else {
                         Log::warning("Không đủ tồn kho cho biến thể ID: {$item->variant_id}");
                     }
-                }
-                // Nếu không có biến thể thì trừ trực tiếp sản phẩm
-                else if ($item->product) {
+                } else if ($item->product) {
                     if ($item->product->stock >= $item->quantity) {
                         $item->product->decrement('stock', $item->quantity);
                         Log::info("Đã trừ {$item->quantity} sản phẩm ID: {$item->product_id}");

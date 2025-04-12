@@ -74,9 +74,18 @@ class ProductControllerUser extends Controller
 
     public function show($slug)
     {
-        // Lấy sản phẩm kèm biến thể & ảnh biến thể
+        // Lấy sản phẩm kèm biến thể, ảnh biến thể, và đánh giá từ người đã mua
         $product = Product::where('slug', $slug)
-            ->with(['categories', 'brands', 'variants.images'])
+            ->with([
+                'categories',
+                'brands',
+                'variants.images',
+                'reviews' => function ($query) {
+                    // Chỉ lấy đánh giá có order_id hợp lệ (tức là từ người đã mua)
+                    $query->whereNotNull('order_id')
+                        ->with('user');
+                }
+            ])
             ->firstOrFail();
 
         // Ghi lại sản phẩm đã xem
@@ -103,6 +112,9 @@ class ProductControllerUser extends Controller
             }
         }
 
+        // Kiểm tra xem người dùng hiện tại đã mua sản phẩm chưa
+        $hasPurchased = Auth::check() ? Auth::user()->hasPurchasedProduct($product->id) : false;
+
         // Lấy danh mục & thương hiệu đầu tiên của sản phẩm
         $categoryName = optional($product->categories->first())->name ?? 'Chưa có danh mục';
         $brandName = optional($product->brands->first())->name ?? 'Chưa có tác giả';
@@ -126,7 +138,45 @@ class ProductControllerUser extends Controller
             ->limit(4)
             ->get();
 
-        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName', 'variantImages'));
+        return view('user.products.show', compact('product', 'relatedProducts', 'categoryName', 'brandName', 'variantImages', 'hasPurchased'));
+    }
+
+    public function storeReview(Request $request, $slug)
+    {
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        // Kiểm tra xem người dùng đã mua sản phẩm chưa
+        if (!Auth::user()->hasPurchasedProduct($product->id)) {
+            return redirect()->back()->with('error', 'Bạn cần mua sản phẩm này để gửi đánh giá.');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|between:1,5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        // Tìm đơn hàng đã hoàn thành liên quan đến sản phẩm
+        $order = Auth::user()->orders()
+            ->where('status', 'completed')
+            ->whereHas('items', function ($query) use ($product) { // Sửa từ orderDetails thành items
+                $query->where('product_id', $product->id);
+            })
+            ->first();
+
+        if (!$order) {
+            return redirect()->back()->with('error', 'Không tìm thấy đơn hàng hợp lệ để gửi đánh giá.');
+        }
+
+        $review = new \App\Models\Review();
+        $review->product_id = $product->id;
+        $review->user_id = Auth::id();
+        $review->order_id = $order->id;
+        $review->rating = $request->rating;
+        $review->comment = $request->comment;
+        $review->save();
+
+        return redirect()->route('products.show', $slug)
+            ->with('success', 'Gửi đánh giá thành công!');
     }
 
     public function search(Request $request)

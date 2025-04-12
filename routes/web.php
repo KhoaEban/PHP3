@@ -24,6 +24,7 @@ use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\CheckoutController;
 
 
+
 // Route::get('/admin/dashboard', function () {
 //     return view('admin.dashboard');
 // })->name('admin.dashboard');
@@ -124,6 +125,9 @@ Route::prefix('user')->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductControllerUser::class, 'index'])->name('user.products');
         Route::get('/{slug}', [ProductControllerUser::class, 'show'])->name('user.products.show');
+        Route::post('/products/{slug}/review', [ProductController::class, 'storeReview'])
+            ->middleware('auth')
+            ->name('products.review');
         Route::post('/product/{productId}/add-to-cart', [CartController::class, 'addToCart'])->name('cart.add');
     });
     Route::get('/get-variant-image', [ProductControllerUser::class, 'getVariantImage']);
@@ -182,6 +186,9 @@ Route::prefix('user')->group(function () {
 });
 Route::get('/checkout/vnpay/callback', [CheckoutController::class, 'vnpayCallback'])->name('checkout.vnpay.callback');
 
+use App\Http\Controllers\MoMoController;
+Route::get('/momo/payment', [MoMoController::class, 'processPayment'])->name('momo.payment');
+Route::get('/momo/callback', [MoMoController::class, 'momoCallback'])->name('momo.callback');
 
 // Xử lý đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register'])->name('register');

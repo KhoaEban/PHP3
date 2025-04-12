@@ -27,4 +27,13 @@ class Review extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function userHasPurchased()
+    {
+        return Order::where('user_id', $this->user_id)
+            ->whereHas('items', function ($query) {
+                $query->where('product_id', $this->product_id);
+            })
+            ->exists();
+    }
 }

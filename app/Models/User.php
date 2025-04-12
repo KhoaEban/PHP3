@@ -40,11 +40,21 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
+    // Kiểm tra xem người dùng đã mua sản phẩm chưa
+    public function hasPurchasedProduct($productId)
+    {
+        return $this->orders()
+            ->where('status', 'completed') // Chỉ tính đơn hàng đã hoàn thành
+            ->whereHas('items', function ($query) use ($productId) { // Sửa từ orderDetails thành items
+                $query->where('product_id', $productId);
+            })
+            ->exists();
+    }
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
-
 
     protected $casts = [
         'email_verified_at' => 'datetime',

@@ -61,6 +61,7 @@
                         <select name="payment_method" class="form-select" required>
                             <option value="cod">Thanh toán khi nhận hàng (COD)</option>
                             <option value="vnpay">VNPAY</option>
+                            <option value="momo">MOMO</option>
                         </select>
 
                         <!-- Nút đặt hàng nằm bên dưới phần lựa chọn phương thức -->

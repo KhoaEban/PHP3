@@ -163,29 +163,51 @@
         </div>
 
 
-        <ul class="tabs wc-tabs product-tabs small-nav-collapse nav nav-uppercase nav-line nav-left" role="tablist">
-            <li class="description_tab active" id="tab-title-description" role="presentation">
-                <a href="#tab-description" role="tab" aria-selected="true" aria-controls="tab-description">Mô tả</a>
+        <ul class="tabs wc-tabs nav nav-tabs nav-fill" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tab-title-description" data-bs-toggle="tab" href="#tab-description"
+                    role="tab">Mô tả</a>
             </li>
-            <li class="additional_information_tab" id="tab-title-additional_information" role="presentation">
-                <a href="#tab-additional_information" role="tab" aria-selected="false"
-                    aria-controls="tab-additional_information">Thông tin bổ sung</a>
+            <li class="nav-item">
+                <a class="nav-link" id="tab-title-additional_information" data-bs-toggle="tab"
+                    href="#tab-additional_information" role="tab">Thông tin bổ sung</a>
             </li>
-            <li class="reviews_tab" id="tab-title-reviews" role="presentation">
-                <a href="#tab-reviews" role="tab" aria-selected="false" aria-controls="tab-reviews">Đánh giá (0)</a>
+            <li class="nav-item">
+                <a class="nav-link" id="tab-title-reviews" data-bs-toggle="tab" href="#tab-reviews" role="tab">Đánh
+                    giá</a>
             </li>
         </ul>
 
+
         <!-- Nội dung của từng tab -->
         <div class="tab-content">
-            <div id="tab-description" class="tab-pane active">
+            <div id="tab-description" class="tab-pane fade show active" role="tabpanel">
                 <p>{{ $product->description }}</p>
             </div>
-            <div id="tab-additional_information" class="tab-pane">
+            <div id="tab-additional_information" class="tab-pane fade" role="tabpanel">
                 <p>{{ $product->additional_information }}</p>
             </div>
-            <div id="tab-reviews" class="tab-pane">
-                <p>Hiện chưa có đánh giá nào.</p>
+            <div id="tab-reviews" class="tab-pane fade" role="tabpanel">
+                <h3 class="mb-3">Đánh Giá Của Người Mua</h3>
+                <!-- Hiển thị danh sách đánh giá từ người đã mua -->
+                @if ($product->reviews->isEmpty())
+                    <p>Hiện chưa có đánh giá nào từ người mua.</p>
+                @else
+                    @foreach ($product->reviews as $review)
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="user-name">{{ $review->user->name }}</span>
+                                <span class="review-date">{{ $review->created_at->format('d/m/Y H:i') }}</span>
+                            </div>
+                            <div class="review-rating">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <span class="star">{{ $i <= $review->rating ? '★' : '☆' }}</span>
+                                @endfor
+                            </div>
+                            <p class="review-comment">{{ $review->comment }}</p>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         </div>
 
@@ -196,15 +218,17 @@
                 <div class="row">
                     @foreach ($relatedProducts as $related)
                         <div class="col-md-3">
-                            <div class="card shadow-sm">
+                            <div class="card shadow-sm" style="height: 100%;">
                                 <a href="{{ route('user.products.show', $related->slug) }}"
                                     class="text-decoration-none text-dark">
                                     <img src="{{ asset('storage/' . $related->image) }}" class="card-img-top"
-                                        alt="{{ $related->title }}">
+                                        alt="{{ $related->title }}" height="200px">
                                     <div class="card-body text-center">
                                         <h6 class="card-title">{{ $related->title }}</h6>
                                         <p class="text-danger fw-bold">{{ number_format($related->price, 0, ',', '.') }}
                                             VNĐ</p>
+                                        <span class="card-text">Tác giả:
+                                            {{ $related->brands->pluck('name')->implode(', ') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -231,7 +255,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Lấy tất cả các tab
+        // Lấy tất cả các tab và nội dung tab
         const tabs = document.querySelectorAll(".tabs.wc-tabs li a");
         const tabContents = document.querySelectorAll(".tab-pane");
 
@@ -246,13 +270,16 @@
                 this.parentElement.classList.add("active");
 
                 // Lấy ID nội dung tab tương ứng
-                const targetTab = this.getAttribute("href").substring(1);
+                const targetTab = this.getAttribute("href").replace("#", "");
 
-                // Ẩn tất cả nội dung tab
-                tabContents.forEach(content => content.classList.remove("active"));
+                // Ẩn tất cả nội dung tab trước khi hiển thị tab mới
+                tabContents.forEach(content => content.classList.remove("show", "active"));
 
                 // Hiển thị nội dung tab được chọn
-                document.getElementById(targetTab).classList.add("active");
+                const targetContent = document.getElementById(targetTab);
+                if (targetContent) {
+                    targetContent.classList.add("show", "active");
+                }
             });
         });
     });
