@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderConfirmation extends Mailable
+class PaymentSuccessMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,8 +20,8 @@ class OrderConfirmation extends Mailable
 
     public function build()
     {
-        return $this->subject('Xác nhận đơn hàng #' . $this->order->id)
-            ->view('emails.order_confirmation')
+        return $this->subject('Xác nhận thanh toán thành công')
+            ->view('emails.payment-success')
             ->with(['order' => $this->order]);
     }
 }

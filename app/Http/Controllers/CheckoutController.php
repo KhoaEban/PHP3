@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Mail\PaymentSuccessMail;
+use Illuminate\Support\Facades\Mail;
 
 use App\Models\Order;      // Model đơn hàng của bạn
 use App\Models\OrderItem;  // Model chi tiết đơn hàng
@@ -179,7 +181,16 @@ class CheckoutController extends Controller
                     }
                 }
             }
-
+            if ($user->email) {
+                try {
+                    Mail::to($user->email)->send(new PaymentSuccessMail($order));
+                } catch (\Exception $e) {
+                    Log::error('Lỗi gửi email: ' . $e->getMessage());
+                }
+            } else {
+                Log::warning('Không có email để gửi thông báo cho đơn hàng ID: ' . $order->id);
+            }
+            $this->sendPaymentSuccessEmail($order);
             return redirect()->route('checkout.success')->with('success', 'Đơn hàng của bạn đã được đặt thành công. Vui lòng chờ xử lý.');
         }
     }
@@ -190,7 +201,7 @@ class CheckoutController extends Controller
 
         $orderId = $request->input('vnp_TxnRef');
 
-        $order = Order::with('items.variant', 'items.product')->find($orderId); // ✅ fix ở đây
+        $order = Order::with('items.variant', 'items.product')->find($orderId);
 
         if (!$order) {
             Log::error("Không tìm thấy đơn hàng: $orderId");
@@ -230,7 +241,12 @@ class CheckoutController extends Controller
                     }
                 }
             }
-
+            try {
+                Mail::to(Auth::user()->email)->send(new PaymentSuccessMail($order));
+            } catch (\Exception $e) {
+                Log::error('Lỗi gửi email: ' . $e->getMessage());
+            }
+            $this->sendPaymentSuccessEmail($order);
             return redirect()->route('checkout.success')->with('success', 'Thanh toán VNPay thành công!');
         } else {
             $order->update([
@@ -243,6 +259,20 @@ class CheckoutController extends Controller
         }
     }
 
+    protected function sendPaymentSuccessEmail($order)
+    {
+        $user = Auth::user();
+        if ($user && $user->email) {
+            try {
+                Mail::to($user->email)->send(new PaymentSuccessMail($order));
+                Log::info('Gửi email thành công cho đơn hàng ID: ' . $order->id);
+            } catch (\Exception $e) {
+                Log::error('Lỗi gửi email cho đơn hàng ID: ' . $order->id . ': ' . $e->getMessage());
+            }
+        } else {
+            Log::warning('Không có email để gửi thông báo cho đơn hàng ID: ' . $order->id);
+        }
+    }
 
     protected function reduceStock($order)
     {
