@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\Brand;
-use App\Models\Discount;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\Brand;
+use App\Models\Discount;
+use App\Imports\ProductsImport;
 
 class ProductController extends Controller
 {
@@ -39,7 +42,24 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products', 'discounts'));
     }
 
+    public function importForm()
+    {
+        return view('admin.products.import_product');
+    }
 
+    public function importProducts(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx,xls|max:2048',
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('excel_file'));
+            return redirect()->route('products.index')->with('success', 'Products imported successfully!');
+        } catch (\Exception $e) {
+            return redirect()->route('products.index')->with('error', 'Error importing products: ' . $e->getMessage());
+        }
+    }
 
     public function create()
     {

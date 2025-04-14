@@ -2,37 +2,40 @@
 Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = '#292b2c';
 
-// Bar Chart Example
-var ctx = document.getElementById("myBarChart");
-var myLineChart = new Chart(ctx, {
+// Bar Chart - Doanh Thu Theo Ngày
+var ctxBar = document.getElementById("myBarChart");
+var myBarChart = new Chart(ctxBar, {
   type: 'bar',
   data: {
-    labels: ["January", "February", "March", "April", "May", "June"],
+    labels: window.chartData.dates, // ["08/04", "09/04", "10/04", "11/04"]
     datasets: [{
       label: "Revenue",
       backgroundColor: "rgba(2,117,216,1)",
       borderColor: "rgba(2,117,216,1)",
-      data: [4215, 5312, 6251, 7841, 9821, 14984],
+      data: window.chartData.revenueTotals, // [23750400, 1053000, 0, 1135500]
     }],
   },
   options: {
     scales: {
       xAxes: [{
         time: {
-          unit: 'month'
+          unit: 'day'
         },
         gridLines: {
           display: false
         },
         ticks: {
-          maxTicksLimit: 6
+          maxTicksLimit: 4
         }
       }],
       yAxes: [{
         ticks: {
           min: 0,
-          max: 15000,
-          maxTicksLimit: 5
+          max: 25000000, // Đặt max dựa trên giá trị lớn nhất (23750400)
+          maxTicksLimit: 5,
+          callback: function (value) {
+            return (value / 1000000) + 'M'; // Hiển thị đơn vị triệu VNĐ
+          }
         },
         gridLines: {
           display: true

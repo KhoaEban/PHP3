@@ -23,23 +23,14 @@ use App\Http\Controllers\User\ProductControllerUser;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\CheckoutController;
 
-
-
-// Route::get('/admin/dashboard', function () {
-//     return view('admin.dashboard');
-// })->name('admin.dashboard');
-
 Route::get('/', function () {
     return view('user.index');
 })->name('user.index');
 
 //Admin
 Route::middleware(['check.role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        $title = 'Trang quản trị';
-        return view('admin.dashboard', compact('title'));
-    })->name('admin.dashboard');
-
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    
     //Route quản lý sản phẩm trong Admin
     Route::prefix('admin')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -48,7 +39,9 @@ Route::middleware(['check.role:admin'])->group(function () {
         Route::get('/products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
         Route::put('/products/update/{product}', [ProductController::class, 'update'])->name('products.update');
         Route::delete('/products/delete/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-
+        // Import sản phẩm
+        Route::get('/', [ProductController::class, 'importForm'])->name('admin.products.import_form');
+        Route::post('/import', [ProductController::class, 'importProducts'])->name('admin.products.import');
         // Quản lý biến thể sản phẩm
         Route::prefix('products')->group(function () {
             Route::get('/variants/{variantId}/show-variants', [ProductVariantController::class, 'index'])->name('product_variants.index');
@@ -187,6 +180,7 @@ Route::prefix('user')->group(function () {
 Route::get('/checkout/vnpay/callback', [CheckoutController::class, 'vnpayCallback'])->name('checkout.vnpay.callback');
 
 use App\Http\Controllers\MoMoController;
+
 Route::get('/momo/payment', [MoMoController::class, 'processPayment'])->name('momo.payment');
 Route::get('/momo/callback', [MoMoController::class, 'momoCallback'])->name('momo.callback');
 

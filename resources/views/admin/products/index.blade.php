@@ -2,13 +2,25 @@
 
 @section('content')
     <div class="container-fluid mt-4">
-        <div class="header">
-            <h1>Sản phẩm</h1>
+        <div class="header" style="display: flex; justify-content: space-between">
+            <div class="d-flex align-items-center">
+                <h1>Sản phẩm</h1>
+                <div class="buttons mx-2">
+                    <a href="{{ route('products.create') }}"
+                        class="text-white text-decoration-none d-flex align-items-center">
+                        <button>
+                            <i class="fas fa-plus me-1"></i>
+                            Thêm sản phẩm
+                        </button>
+                    </a>
+                </div>
+            </div>
             <div class="buttons mx-2">
-                <a href="{{ route('products.create') }}" class="text-white text-decoration-none d-flex align-items-center">
+                <a href="{{ route('admin.products.import_form') }}"
+                    class="text-white text-decoration-none d-flex align-items-center">
                     <button>
-                        <i class="fas fa-plus me-1"></i>
-                        Thêm sản phẩm
+                        <i class="fas fa-upload me-1"></i>
+                        Import Products
                     </button>
                 </a>
             </div>
