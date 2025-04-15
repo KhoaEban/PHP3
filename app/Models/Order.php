@@ -9,9 +9,6 @@ class Order extends Model
 {
     use HasFactory;
 
-    // Nếu bảng có tên orders thì có thể không cần khai báo lại
-    // protected $table = 'orders';
-
     protected $fillable = [
         'user_id',
         'name',

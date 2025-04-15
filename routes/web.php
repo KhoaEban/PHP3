@@ -23,6 +23,21 @@ use App\Http\Controllers\User\ProductControllerUser;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\CheckoutController;
 
+// Route AI
+use App\Http\Controllers\GeminiChatController;
+
+// Route Momo
+use App\Http\Controllers\MoMoController;
+
+// Gemini Chat
+Route::get('/chat', [GeminiChatController::class, 'index'])->name('chat.index');
+Route::post('/chat/send', [GeminiChatController::class, 'send'])->name('chat.send');
+Route::get('/chat/history', [GeminiChatController::class, 'history'])->name('chat.history'); // Route để lấy lịch sử chat
+Route::get('/check-table', function () {
+    return response()->json([
+        'chat_messages_exists' => \Illuminate\Support\Facades\Schema::hasTable('chat_messages'),
+    ]);
+});
 Route::get('/', function () {
     return view('user.index');
 })->name('user.index');
@@ -30,7 +45,7 @@ Route::get('/', function () {
 //Admin
 Route::middleware(['check.role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    
+
     //Route quản lý sản phẩm trong Admin
     Route::prefix('admin')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -138,6 +153,7 @@ Route::prefix('user')->group(function () {
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::get('/checkout/failed', [CheckoutController::class, 'failed'])->name('checkout.failed');
+    Route::get('/order/{id}/buy-again', [CheckoutController::class, 'buyAgain'])->name('order.buy-again');
 
     Route::prefix('profile')->group(function () {
         Route::get('/', [UserController::class, 'profile'])->name('user.profile');
@@ -152,6 +168,9 @@ Route::prefix('user')->group(function () {
         Route::get('/details/{order_id}', [UserController::class, 'orderDetails'])->name('user.order.details');
         Route::post('/orders/{order_id}/review', [UserController::class, 'storeReview'])->name('user.order.review');
         Route::get('/orders/{order_id}/review/filter/{rating}', [UserController::class, 'filterReviews'])->name('user.order.reviews.filter');
+        // Xem lịch sử đơn hàng
+        Route::get('/history/orders', [UserController::class, 'orderHistory'])->name('user.order.history');
+        Route::post('/cancel/{order_id}', [UserController::class, 'cancel'])->name('order.cancel');
     });
 
     // Tìm kiếm sản phẩm
@@ -178,8 +197,6 @@ Route::prefix('user')->group(function () {
     })->name('about');
 });
 Route::get('/checkout/vnpay/callback', [CheckoutController::class, 'vnpayCallback'])->name('checkout.vnpay.callback');
-
-use App\Http\Controllers\MoMoController;
 
 Route::get('/momo/payment', [MoMoController::class, 'processPayment'])->name('momo.payment');
 Route::get('/momo/callback', [MoMoController::class, 'momoCallback'])->name('momo.callback');

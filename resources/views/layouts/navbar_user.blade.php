@@ -172,6 +172,124 @@
         @yield('content')
     </main>
 
+    <!-- Chat Button -->
+    <div id="chat-container">
+        <div id="chat-bubble" class="d-none">
+            <iframe src="{{ route('chat.index') }}" frameborder="0"
+                style="width: 100%; height: 100%; border-radius: 15px;"></iframe>
+        </div>
+        <button id="chat-toggle" class="btn btn-primary chat-toggle-btn">
+            <i class="fas fa-comments"></i> Chat
+        </button>
+    </div>
+    <script>
+        document.getElementById('chat-toggle').addEventListener('click', function() {
+            const chatBubble = document.getElementById('chat-bubble');
+            chatBubble.classList.toggle('d-none');
+        });
+    </script>
+    <style>
+        .dropdown-menu {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            white-space: normal;
+        }
+
+        .bg_finished {
+            background-color: #00ff002c !important;
+        }
+
+        .bg_unfinished {
+            background-color: #ff00002c !important;
+        }
+
+        /* Chat Container */
+        #chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* Chat Toggle Button */
+        .chat-toggle-btn {
+            font-size: 1.2em;
+            /* Increase font size for larger text/icon */
+            padding: 15px 25px;
+            /* Larger padding for a bigger button */
+            background: #4a4a4a !important;
+            /* Dark gray background to match Grok theme */
+            color: #ffffff !important;
+            /* White text */
+            border: none !important;
+            /* Remove default border */
+            border-radius: 30px !important;
+            /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            /* Subtle shadow for depth */
+            transition: background 0.2s ease, transform 0.1s ease;
+            /* Smooth transitions */
+        }
+
+        .chat-toggle-btn:hover {
+            background: #5a5a5a !important;
+            /* Lighter gray on hover */
+            transform: scale(1.05);
+            /* Slight scale-up effect on hover */
+        }
+
+        .chat-toggle-btn i {
+            margin-right: 8px;
+            /* Space between icon and text */
+        }
+
+        /* Chat Bubble */
+        #chat-bubble {
+            width: 400px;
+            /* Fixed width for the chat window */
+            height: 600px;
+            /* Fixed height for the chat window */
+            background: #2a2a2a;
+            /* Dark background to match Grok theme */
+            border-radius: 15px;
+            /* Rounded corners */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            /* Floating effect */
+            position: absolute;
+            bottom: 80px;
+            /* Position above the button */
+            right: 0;
+            overflow: hidden;
+            /* Ensure iframe fits within rounded corners */
+        }
+
+        /* Hide chat bubble when d-none is applied */
+        #chat-bubble.d-none {
+            display: none !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            #chat-bubble {
+                width: 90vw;
+                /* Full width on smaller screens */
+                height: 80vh;
+                /* Taller on mobile */
+                bottom: 70px;
+                /* Adjust position */
+            }
+
+            .chat-toggle-btn {
+                font-size: 1em;
+                /* Slightly smaller font on mobile */
+                padding: 12px 20px;
+                /* Adjust padding */
+            }
+        }
+    </style>
 </body>
 
 </html>

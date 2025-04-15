@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\PaymentSuccessMail;
 use Illuminate\Support\Facades\Mail;
 
-use App\Models\Order;      // Model đơn hàng của bạn
-use App\Models\OrderItem;  // Model chi tiết đơn hàng
-use App\Models\Cart;       // Giả sử bạn lưu giỏ hàng của user
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Cart;
+use App\Models\CartItem;
 
 class CheckoutController extends Controller
 {
@@ -273,6 +274,50 @@ class CheckoutController extends Controller
             Log::warning('Không có email để gửi thông báo cho đơn hàng ID: ' . $order->id);
         }
     }
+
+    public function buyAgain($order_id)
+    {
+        $order = Order::where('id', $order_id)
+            ->where('user_id', Auth::id())
+            ->whereIn('status', ['unpaid', 'cancelled']) // kiểm tra cả unpaid và cancelled
+            ->first();
+
+        if (!$order) {
+            return redirect()->back()->with('error', 'Không tìm thấy đơn hàng hoặc trạng thái không hợp lệ.');
+        }
+
+        // Tìm hoặc tạo giỏ hàng cho user
+        $cart = Cart::firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['total_price' => 0]
+        );
+
+        // Lấy danh sách sản phẩm từ order_items
+        $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+        foreach ($orderItems as $item) {
+            $cartItem = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $item->product_id)
+                ->where('variant_id', $item->variant_id)
+                ->first();
+
+            if ($cartItem) {
+                $cartItem->quantity += $item->quantity;
+                $cartItem->save();
+            } else {
+                CartItem::create([
+                    'cart_id'    => $cart->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->variant_id,
+                    'quantity'   => $item->quantity,
+                    'price'      => $item->price,
+                ]);
+            }
+        }
+
+        return redirect()->route('cart.show')->with('success', 'Các sản phẩm đã được thêm lại vào giỏ hàng!');
+    }
+
 
     protected function reduceStock($order)
     {

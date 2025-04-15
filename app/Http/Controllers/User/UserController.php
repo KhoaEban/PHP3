@@ -235,4 +235,36 @@ class UserController extends Controller
         $user = Auth::user();
         return view('user.profile.change-password', compact('user'));
     }
+
+    public function orderHistory()
+    {
+        $userId = Auth::id();
+        $orders = Order::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        foreach ($orders as $order) {
+            if ($order->status == 'unpaid' && $order->created_at->diffInHours(now()) > 24) {
+                $order->update(['status' => 'cancelled']);
+            }
+        }
+
+        $orders = Order::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return view('user.profile.order_history', compact('orders'));
+    }
+
+    public function cancel($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        if ($order->user_id !== Auth::id()) {
+            return redirect()->route('user.order.history')->with('error', 'Bạn không có quyền truy cập đơn hàng này.');
+        }
+        if ($order->status !== 'unpaid' && $order->status !== 'failed') {
+            return redirect()->route('user.order.history')->with('error', 'Không thể hủy đơn hàng này.');
+        }
+        $order->update(['status' => 'cancelled']);
+        return redirect()->route('user.order.history')->with('success', 'Đơn hàng đã được hủy.');
+    }
 }

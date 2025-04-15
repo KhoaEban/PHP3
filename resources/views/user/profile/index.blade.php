@@ -62,13 +62,13 @@
                                 <div class="swiper-scrollbar"></div>
                             </div>
                         </div>
-
-                        <!-- Sản phẩm đã mua -->
                     </div>
+                    <!-- Sản phẩm đã mua -->
                     <div class="col-12 mt-5">
                         <div class="courses">
-                            <div class="header mb-3">
+                            <div class="header mb-3 d-flex justify-content-between align-items-center">
                                 <p>Sản phẩm đã mua ({{ $orders->flatMap->items->count() }})</p>
+                                <a style="text-decoration: none; margin-bottom: 16px" href="{{ route('user.order.history') }}">Xem lịch sử đơn hàng</a>
                             </div>
                             <div class="swiper purchased-products-swiper">
                                 <div class="swiper-wrapper">
