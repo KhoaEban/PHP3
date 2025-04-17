@@ -171,6 +171,12 @@ Route::prefix('user')->group(function () {
         // Xem lịch sử đơn hàng
         Route::get('/history/orders', [UserController::class, 'orderHistory'])->name('user.order.history');
         Route::post('/cancel/{order_id}', [UserController::class, 'cancel'])->name('order.cancel');
+
+        // Quản lý địa chỉ
+        Route::get('/addresses', [UserController::class, 'addresses'])->name('user.addresses');
+        Route::post('/addresses', [UserController::class, 'storeAddress'])->name('user.addresses.store');
+        Route::post('/addresses/{addressId}/set-default', [UserController::class, 'setDefaultAddress'])->name('user.addresses.setDefault');
+        Route::delete('/addresses/{addressId}', [UserController::class, 'deleteAddress'])->name('user.addresses.delete');
     });
 
     // Tìm kiếm sản phẩm

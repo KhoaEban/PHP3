@@ -68,6 +68,10 @@
                 <span><i class="fas fa-lock"></i> <a href="{{ route('user.password.edit') }}"> Mật khẩu và bảo
                         mật</a></span>
             </button>
+            <button class="secondary">
+                <span><i class="fa-solid fa-address-card"></i> <a href="{{ route('user.addresses') }}"> Địa chỉ giao
+                        hàng</a></span>
+            </button>
         </div>
     </div>
 

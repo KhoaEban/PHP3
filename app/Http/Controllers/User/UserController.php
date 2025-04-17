@@ -12,7 +12,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Review;
-
+use App\Models\Address;
 
 class UserController extends Controller
 {
@@ -195,8 +195,6 @@ class UserController extends Controller
         return back()->with('success', 'Cập nhật mật khẩu thành công');
     }
 
-
-
     public function updateProfileEmail(Request $request)
     {
         $request->validate([
@@ -234,6 +232,68 @@ class UserController extends Controller
     {
         $user = Auth::user();
         return view('user.profile.change-password', compact('user'));
+    }
+
+    public function addresses()
+    {
+        $user = Auth::user();
+        $addresses = $user->addresses()->get();
+        $defaultAddress = $user->defaultAddress();
+
+        return view('user.profile.add_addresses', compact('addresses', 'defaultAddress', 'user'));
+    }
+
+    public function storeAddress(Request $request)
+    {
+        $request->validate([
+            'address' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'recipient_name' => 'required|string|max:100',
+            'is_default' => 'boolean',
+        ]);
+
+        $user = Auth::user();
+        $address = $user->addresses()->create([
+            'address' => $request->address,
+            'phone' => $request->phone,
+            'recipient_name' => $request->recipient_name,
+            'is_default' => $request->is_default ?? false,
+        ]);
+
+        // Nếu chọn là địa chỉ mặc định, cập nhật các địa chỉ khác thành không mặc định
+        if ($request->is_default) {
+            $user->addresses()->where('id', '!=', $address->id)->update(['is_default' => false]);
+        }
+
+        return redirect()->route('user.addresses')->with('success', 'Đã thêm địa chỉ mới.');
+    }
+
+    public function setDefaultAddress($addressId)
+    {
+        $user = Auth::user();
+        $address = $user->addresses()->findOrFail($addressId);
+
+        // Đặt địa chỉ này thành mặc định và cập nhật các địa chỉ khác
+        $user->addresses()->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        return redirect()->route('user.addresses')->with('success', 'Đã đặt địa chỉ mặc định.');
+    }
+
+    public function deleteAddress($addressId)
+    {
+        $user = Auth::user();
+        $address = $user->addresses()->findOrFail($addressId);
+
+        // Nếu địa chỉ bị xóa là mặc định, tự động đặt địa chỉ khác làm mặc định
+        if ($address->is_default && $user->addresses()->count() > 1) {
+            $newDefault = $user->addresses()->where('id', '!=', $addressId)->first();
+            $newDefault->update(['is_default' => true]);
+        }
+
+        $address->delete();
+
+        return redirect()->route('user.addresses')->with('success', 'Đã xóa địa chỉ.');
     }
 
     public function orderHistory()

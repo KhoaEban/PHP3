@@ -41,6 +41,17 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    // Lấy địa chỉ mặc định
+    public function defaultAddress()
+    {
+        return $this->addresses()->where('is_default', true)->first() ?? $this->addresses()->first();
+    }
+
     // Kiểm tra xem người dùng đã mua sản phẩm chưa
     public function hasPurchasedProduct($productId)
     {
