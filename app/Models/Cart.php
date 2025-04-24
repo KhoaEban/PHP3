@@ -9,7 +9,7 @@ class Cart extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'discount_id'];
 
     // Liên kết với bảng CartItem
     public function items()
@@ -34,5 +34,9 @@ class Cart extends Model
     {
         return $this->items->sum(fn($item) => $item->quantity * $item->price);
     }
-    
+
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
+    }
 }

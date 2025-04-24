@@ -3,7 +3,15 @@
 @section('content')
     <div class="container mt-4">
         <h1 class="text-center fw-bold text-dark">Gán mã giảm giá cho sản phẩm</h1>
-
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="row mt-4">
             <div class="col-md-6 offset-md-3">
                 <div class="border p-4 rounded shadow-sm bg-white">
@@ -15,8 +23,10 @@
                             <label class="fw-bold">Chọn mã giảm giá:</label>
                             <select name="discount_id" class="form-control">
                                 @foreach ($discounts as $discount)
-                                    <option value="{{ $discount->id }}" {{ $product->discount_id == $discount->id ? 'selected' : '' }}>
-                                        {{ $discount->code }} ({{ $discount->type == 'percentage' ? $discount->amount . '%' : number_format($discount->amount, 0, ',', '.') . ' VNĐ' }})
+                                    <option value="{{ $discount->id }}"
+                                        {{ $product->discount_id == $discount->id ? 'selected' : '' }}>
+                                        {{ $discount->code }}
+                                        ({{ $discount->type == 'percentage' ? $discount->amount . '%' : number_format($discount->amount, 0, ',', '.') . ' VNĐ' }})
                                     </option>
                                 @endforeach
                             </select>

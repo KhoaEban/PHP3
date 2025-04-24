@@ -34,7 +34,7 @@
                             <div class="input-container">
                                 <img src="{{ asset('images/m.png') }}" alt="User Icon" class="input-icon">
                                 <input type="text" name="name" value="{{ old('name') }}" placeholder="Họ và tên"
-                                    autocomplete="off" required>
+                                    autocomplete="off" >
                             </div>
                             @error('name')
                                 <div class="error">{{ $message }}</div>
@@ -42,7 +42,7 @@
 
                             <div class="input-container">
                                 <i class="fa fa-envelope input-icon-email"></i>
-                                <input type="email" name="email" placeholder="Email" autocomplete="off" required>
+                                <input type="email" name="email" placeholder="Email" autocomplete="off" >
                             </div>                            
                             @error('email')
                                 <div class="error">{{ $message }}</div>
@@ -51,7 +51,7 @@
                             <div class="input-container">
                                 <img src="{{ asset('images/l.png') }}" alt="Password Icon" class="input-icon">
                                 <input type="password" name="password" placeholder="Mật khẩu" autocomplete="off"
-                                    required>
+                                    >
                             </div>
                             @error('password')
                                 <div class="error">{{ $message }}</div>
@@ -60,7 +60,7 @@
                             <div class="input-container">
                                 <img src="{{ asset('images/l.png') }}" alt="Confirm Password Icon" class="input-icon">
                                 <input type="password" name="password_confirmation" placeholder="Xác nhận mật khẩu"
-                                    autocomplete="off" required>
+                                    autocomplete="off" >
                             </div>
 
                             <input type="submit" value="Đăng ký">

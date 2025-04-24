@@ -47,8 +47,8 @@ class MoMoController extends Controller
         $orderId = $order->id . 'MOMOPAY' . rand(10000, 99999);
         $orderInfo = "Thanh toán đơn hàng #$order->id";
         $requestId = $partnerCode . time();
-        $requestType = "payWithATM"; // Hoặc "payWithMethod" nếu cần
-        $extraData = "";
+        $requestType = "payWithATM"; // Sử dụng payWithATM để hỗ trợ thanh toán bằng thẻ ATM
+        $extraData = base64_encode(json_encode(['orderId' => $order->id]));
 
         $rawSignature = "accessKey=$accessKey" .
             "&amount=$amount" .
@@ -65,30 +65,30 @@ class MoMoController extends Controller
 
         $data = [
             "partnerCode" => $partnerCode,
-            "accessKey" => $accessKey,
+            "partnerName" => "BookStore", // Thay bằng tên ứng dụng của bạn
+            "storeId" => "BookStore", // Tùy chọn, có thể bỏ
             "requestId" => $requestId,
-            "amount" => $amount,
+            "amount" => (int)$amount,
             "orderId" => $orderId,
             "orderInfo" => $orderInfo,
             "redirectUrl" => $returnUrl,
             "ipnUrl" => $returnUrl,
+            "lang" => "vi",
             "extraData" => $extraData,
             "requestType" => $requestType,
-            "signature" => $signature,
-            "lang" => "vi"
+            "signature" => $signature
         ];
 
         $response = $this->execPostRequest($endpoint, json_encode($data));
         $result = json_decode($response, true);
 
-        if (!empty($result['payUrl'])) {
+        if (isset($result['payUrl']) && !empty($result['payUrl'])) {
             return $result['payUrl'];
         } else {
             Log::error('MoMo payment URL creation failed', ['response' => $result]);
-            abort(500, 'Không thể tạo URL thanh toán MoMo');
+            abort(500, 'Không thể tạo URL thanh toán MoMo: ' . ($result['message'] ?? 'Lỗi không xác định'));
         }
     }
-
     private function execPostRequest($url, $data)
     {
         $ch = curl_init($url);
@@ -117,29 +117,31 @@ class MoMoController extends Controller
 
         Log::info('MoMo Callback Data: ', $data);
 
-        if (!isset($data['orderId']) || !isset($data['resultCode'])) {
+        if (!isset($data['orderId']) || !isset($data['resultCode']) || !isset($data['signature'])) {
             Log::error('Invalid MoMo callback data', $data);
             return redirect()->route('checkout.failed')->with('error', 'Dữ liệu callback không hợp lệ');
         }
 
-        $orderIdParts = explode('MOMOPAY', $data['orderId']);
-        $originalOrderId = $orderIdParts[0];
-
+        // Tạo chữ ký để kiểm tra
         $rawSignature = "accessKey=" . env('MOMO_ACCESS_KEY') .
-            "&amount={$data['amount']}" .
-            "&extraData={$data['extraData']}" .
-            "&message={$data['message']}" .
-            "&orderId={$data['orderId']}" .
-            "&orderInfo={$data['orderInfo']}" .
-            "&orderType={$data['orderType']}" .
-            "&partnerCode={$data['partnerCode']}" .
-            "&payType={$data['payType']}" .
-            "&requestId={$data['requestId']}" .
-            "&responseTime={$data['responseTime']}" .
-            "&resultCode={$data['resultCode']}" .
-            "&transId={$data['transId']}";
+            "&amount=" . ($data['amount'] ?? '') .
+            "&extraData=" . ($data['extraData'] ?? '') .
+            "&message=" . ($data['message'] ?? '') .
+            "&orderId=" . ($data['orderId'] ?? '') .
+            "&orderInfo=" . ($data['orderInfo'] ?? '') .
+            "&orderType=" . ($data['orderType'] ?? '') .
+            "&partnerCode=" . ($data['partnerCode'] ?? '') .
+            "&payType=" . ($data['payType'] ?? '') .
+            "&requestId=" . ($data['requestId'] ?? '') .
+            "&responseTime=" . ($data['responseTime'] ?? '') .
+            "&resultCode=" . ($data['resultCode'] ?? '') .
+            "&transId=" . ($data['transId'] ?? '');
 
         $calculatedSignature = hash_hmac('sha256', $rawSignature, $secretKey);
+
+        // Tách orderId gốc
+        $orderIdParts = explode('MOMOPAY', $data['orderId']);
+        $originalOrderId = $orderIdParts[0];
 
         $order = Order::with('items.variant', 'items.product')->find($originalOrderId);
 
@@ -151,7 +153,7 @@ class MoMoController extends Controller
         Auth::loginUsingId($order->user_id);
 
         if ($calculatedSignature === $data['signature'] && $data['resultCode'] == '0') {
-            // Payment successful
+            // Thanh toán thành công
             $order->update([
                 'status'         => 'completed',
                 'payment_id'     => $data['transId'],
@@ -177,17 +179,32 @@ class MoMoController extends Controller
                 }
             }
 
-            // Xóa giỏ hàng
-            Cart::where('user_id', Auth::id())->delete();
+            // Xóa giỏ hàng và mã giảm giá
+            $cart = Cart::where('user_id', Auth::id())->first();
+            if ($cart) {
+                $cart->items()->delete();
+                $cart->update(['discount_id' => null]); // Xóa mã giảm giá
+                $cart->delete();
+            }
+
+            // Gửi email thông báo
+            // $this->sendPaymentSuccessEmail($order);
 
             return redirect()->route('checkout.success')->with('success', 'Thanh toán MoMo thành công!');
         } else {
-            // Payment failed
+            // Thanh toán thất bại
             $order->update([
                 'status' => 'failed',
             ]);
 
-            return redirect()->route('checkout.failed')->with('error', 'Thanh toán MoMo không thành công!');
+            Log::error('MoMo payment failed', [
+                'orderId' => $originalOrderId,
+                'resultCode' => $data['resultCode'],
+                'message' => $data['message'] ?? 'No message',
+                'signatureMatch' => $calculatedSignature === $data['signature']
+            ]);
+
+            return redirect()->route('checkout.failed')->with('error', 'Thanh toán MoMo không thành công: ' . ($data['message'] ?? 'Lỗi không xác định'));
         }
     }
 }

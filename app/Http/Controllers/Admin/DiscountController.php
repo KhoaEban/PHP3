@@ -30,6 +30,10 @@ class DiscountController extends Controller
 
         Discount::create($request->all());
 
+        if ($request->expires_at <= now()) {
+            
+        }
+
         return redirect()->route('discounts.index')->with('success', 'Mã giảm giá đã được thêm!');
     }
 

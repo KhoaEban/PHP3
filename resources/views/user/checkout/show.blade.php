@@ -31,9 +31,15 @@
                     <table class="order-table">
                         @foreach ($cart->items as $item)
                             <tr>
-                                <td>{{ $item->product->title }} x {{ $item->quantity }}</td>
+                                <td>
+                                    {{ $item->product->title }}
+                                    @if ($item->variant_id && $item->variant)
+                                        ({{ $item->variant->variant_type }}: {{ $item->variant->variant_value }})
+                                    @endif
+                                    x {{ $item->quantity }}
+                                </td>
                                 <td class="text-end">
-                                    {{ number_format($item->quantity * $item->product->price, 0, ',', '.') }} VND
+                                    {{ number_format($item->quantity * $item->price, 0, ',', '.') }} VND
                                 </td>
                             </tr>
                         @endforeach

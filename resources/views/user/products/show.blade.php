@@ -509,3 +509,22 @@
         transform: translateY(-5px);
     }
 </style>
+<script>
+    document.getElementById('quantity').addEventListener('input', function() {
+        const maxStock = parseInt(this.getAttribute('max'));
+        if (this.value > maxStock) {
+            this.value = maxStock;
+            alert('Số lượng vượt quá tồn kho!');
+        }
+    });
+
+    document.getElementById('variant-select').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const stock = parseInt(selectedOption.getAttribute('data-stock'));
+        const quantityInput = document.getElementById('quantity');
+        quantityInput.setAttribute('max', stock);
+        if (quantityInput.value > stock) {
+            quantityInput.value = stock;
+        }
+    });
+</script>

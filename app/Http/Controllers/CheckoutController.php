@@ -21,26 +21,30 @@ class CheckoutController extends Controller
     public function show()
     {
         $user = Auth::user();
-        $cart = $user ? Cart::where('user_id', $user->id)->with('items.product.discount')->first() : null;
+        $cart = $user ? Cart::where('user_id', $user->id)->with('items.product', 'items.variant', 'discount')->first() : null;
 
         if (!$cart || $cart->items->isEmpty()) {
             return redirect()->route('cart.show')->with('error', 'Giỏ hàng của bạn đang trống.');
         }
 
-        $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+        $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->price);
+        $totalAfterDiscount = $totalBeforeDiscount;
         $discountValue = 0;
         $discountPercentage = 0;
-        foreach ($cart->items as $item) {
-            if ($item->product->discount) {
-                $discount = $item->product->discount;
+
+        if ($cart->discount) {
+            $discount = $cart->discount;
+            foreach ($cart->items as $item) {
                 $itemDiscount = ($discount->type === 'percentage')
-                    ? ($item->quantity * $item->product->price * $discount->amount / 100)
-                    : min($discount->amount, $item->quantity * $item->product->price);
+                    ? ($item->quantity * $item->price * $discount->amount / 100)
+                    : min($discount->amount, $item->quantity * $item->price);
                 $discountValue += $itemDiscount;
-                $discountPercentage = ($discount->type === 'percentage') ? $discount->amount : (($discountValue / $totalBeforeDiscount) * 100);
             }
+            $totalAfterDiscount -= $discountValue;
+            $discountPercentage = ($discount->type === 'percentage')
+                ? $discount->amount
+                : (($discountValue / $totalBeforeDiscount) * 100);
         }
-        $totalAfterDiscount = $totalBeforeDiscount - $discountValue;
 
         $orderId = time();
 
@@ -60,30 +64,33 @@ class CheckoutController extends Controller
             'name'           => 'required|string|max:255',
             'phone'          => 'required|string|max:20',
             'address'        => 'required|string|max:500',
-            'payment_method' => 'required|in:cod,vnpay,momo', // Ensure 'momo' is here
+            'payment_method' => 'required|in:cod,vnpay,momo',
         ]);
 
         $user = Auth::user();
         $cart = Cart::where('user_id', $user->id)
-            ->with('items.product.discount', 'items.variant')
+            ->with('items.product', 'items.variant', 'discount')
             ->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return redirect()->route('cart.show')->with('error', 'Giỏ hàng của bạn đang trống.');
         }
 
-        $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->product->price);
+        $totalBeforeDiscount = $cart->items->sum(fn($item) => $item->quantity * $item->price);
+        $totalAfterDiscount = $totalBeforeDiscount;
         $discountValue = 0;
-        foreach ($cart->items as $item) {
-            if ($item->product->discount) {
-                $discount = $item->product->discount;
+
+        if ($cart->discount) {
+            $discount = $cart->discount;
+            foreach ($cart->items as $item) {
                 $itemDiscount = ($discount->type === 'percentage')
-                    ? ($item->quantity * $item->product->price * $discount->amount / 100)
-                    : min($discount->amount, $item->quantity * $item->product->price);
+                    ? ($item->quantity * $item->price * $discount->amount / 100)
+                    : min($discount->amount, $item->quantity * $item->price);
                 $discountValue += $itemDiscount;
             }
+            $totalAfterDiscount -= $discountValue;
         }
-        $totalAfterDiscount = $totalBeforeDiscount - $discountValue;
+
         $orderId = $request->input('order_id') ?: time();
 
         // Tạo đơn hàng
@@ -94,7 +101,7 @@ class CheckoutController extends Controller
             'phone'      => $request->phone,
             'address'    => $request->address,
             'total'      => $totalAfterDiscount,
-            'payment_method' => $request->payment_method, // 'momo' is passed here
+            'payment_method' => $request->payment_method,
             'status'     => $request->payment_method === 'cod' ? 'pending' : 'unpaid',
         ]);
 
@@ -104,18 +111,18 @@ class CheckoutController extends Controller
                 'product_id' => $item->product_id,
                 'variant_id' => $item->variant_id,
                 'quantity'   => $item->quantity,
-                'price'      => $item->product->price,
+                'price'      => $item->price, // Sử dụng giá từ cart_items
             ]);
         }
 
         // Xử lý MoMo
         if ($request->payment_method === 'momo') {
-            // Không xóa giỏ hàng ở đây, để MoMo callback xử lý
             return redirect()->route('momo.payment', ['amount' => $totalAfterDiscount, 'order_id' => $order->id]);
         }
 
-        // Xoá giỏ hàng cho COD và VNPay
+        // Xóa giỏ hàng và mã giảm giá cho COD và VNPay
         $cart->items()->delete();
+        $cart->update(['discount_id' => null]); // Xóa mã giảm giá
         $cart->delete();
 
         // Xử lý VNPay
@@ -188,8 +195,6 @@ class CheckoutController extends Controller
                 } catch (\Exception $e) {
                     Log::error('Lỗi gửi email: ' . $e->getMessage());
                 }
-            } else {
-                Log::warning('Không có email để gửi thông báo cho đơn hàng ID: ' . $order->id);
             }
             $this->sendPaymentSuccessEmail($order);
             return redirect()->route('checkout.success')->with('success', 'Đơn hàng của bạn đã được đặt thành công. Vui lòng chờ xử lý.');

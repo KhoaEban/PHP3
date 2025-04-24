@@ -9,12 +9,20 @@
                 <form action="{{ route('products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="mb-3">
                         <div class="row">
                             <div class="col-6">
                                 <label class="fw-bold">Chọn danh mục:</label>
-                                <select name="category_ids[]" class="form-control select2-category" multiple required>
+                                <select name="category_ids[]" class="form-control select2-category" multiple>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}"
                                             @if (isset($product) && $product->categories->contains($category->id)) selected @endif>
@@ -25,7 +33,7 @@
                             </div>
                             <div class="col-6">
                                 <label class="fw-bold">Chọn thương hiệu:</label>
-                                <select name="brand_ids[]" class="form-control select2-brand" multiple required>
+                                <select name="brand_ids[]" class="form-control select2-brand" multiple>
                                     @foreach ($brands as $brand)
                                         <option value="{{ $brand->id }}"
                                             @if (isset($product) && $product->brands->contains($brand->id)) selected @endif>
@@ -39,7 +47,7 @@
 
                     <div class="mb-3">
                         <label class="fw-bold">Tên sản phẩm:</label>
-                        <input type="text" name="title" class="form-control" value="{{ $product->title }}" required>
+                        <input type="text" name="title" class="form-control" value="{{ $product->title }}">
                     </div>
 
                     <div class="mb-3">
@@ -52,12 +60,12 @@
                             <div class="col-6">
                                 <label for="price">Giá sản phẩm</label>
                                 <input type="number" name="price" class="form-control"
-                                    value="{{ old('price', $product->price) }}" required>
+                                    value="{{ old('price', $product->price) }}">
                             </div>
                             <div class="col-6">
                                 <label for="stock">Số lượng sản phẩm</label>
                                 <input type="number" name="stock" class="form-control"
-                                    value="{{ old('stock', $product->stock) }}" required>
+                                    value="{{ old('stock', $product->stock) }}">
                             </div>
                         </div>
                     </div>

@@ -202,6 +202,7 @@ Route::prefix('user')->group(function () {
         return view('user.about', $data);
     })->name('about');
 });
+
 Route::get('/checkout/vnpay/callback', [CheckoutController::class, 'vnpayCallback'])->name('checkout.vnpay.callback');
 
 Route::get('/momo/payment', [MoMoController::class, 'processPayment'])->name('momo.payment');

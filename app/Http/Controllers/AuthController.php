@@ -5,14 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use League\OAuth2\Client\Provider\Google;
-
-
 use App\Models\User;
 
 class AuthController extends Controller
 {
-
     protected $provider;
 
     public function __construct()
@@ -27,11 +25,26 @@ class AuthController extends Controller
     // Xử lý đăng ký
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:users,name', // Kiểm tra trùng tên
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
+        ], [
+            'name.required' => 'Tên người dùng là bắt buộc.',
+            'name.max' => 'Tên người dùng không được vượt quá 255 ký tự.',
+            'name.unique' => 'Tên người dùng đã được sử dụng.',
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Email không đúng định dạng.',
+            'email.max' => 'Email không được vượt quá 255 ký tự.',
+            'email.unique' => 'Email đã được sử dụng.',
+            'password.required' => 'Mật khẩu là bắt buộc.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         User::create([
             'name' => $request->name,
@@ -47,13 +60,23 @@ class AuthController extends Controller
     // Xử lý đăng nhập
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string',
+        ], [
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Email không đúng định dạng.',
+            'password.required' => 'Mật khẩu là bắt buộc.',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $credentials = $request->only('email', 'password');
+
         if (Auth::attempt($credentials)) {
-            $user = Auth::user(); // Lấy thông tin user đang đăng nhập
+            $user = Auth::user();
 
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Đăng nhập thành công (Admin)!');
@@ -62,7 +85,7 @@ class AuthController extends Controller
             }
         }
 
-        return back()->withErrors(['email' => 'Sai thông tin đăng nhập.']);
+        return redirect()->back()->withErrors(['email' => 'Sai thông tin đăng nhập.'])->withInput();
     }
 
     // Đăng nhập bằng Google
@@ -90,26 +113,22 @@ class AuthController extends Controller
 
             $googleUser = $this->provider->getResourceOwner($token);
 
-            // Kiểm tra xem người dùng có trong hệ thống chưa
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if (!$user) {
-                // Nếu người dùng chưa tồn tại, tạo mới
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
-                    'password' => bcrypt(str()->random(16)), // Mật khẩu ngẫu nhiên
+                    'password' => bcrypt(str()->random(16)),
                 ]);
             } elseif (!$user->google_id) {
-                // Nếu tài khoản đã có mà chưa có google_id, cập nhật google_id
                 $user->update([
                     'google_id' => $googleUser->getId(),
                 ]);
             }
 
-            // Đăng nhập vào hệ thống
             Auth::login($user);
 
             if (Auth::user()->role === 'admin') {
@@ -122,12 +141,11 @@ class AuthController extends Controller
         }
     }
 
-
     // Đăng xuất
     public function logout()
     {
         Auth::logout();
-        session()->flush(); // Xoá toàn bộ session
+        session()->flush();
         return redirect('/login')->with('success', 'Bạn đã đăng xuất.');
     }
 }

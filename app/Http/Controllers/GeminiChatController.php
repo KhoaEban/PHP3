@@ -131,26 +131,39 @@ class GeminiChatController extends Controller
         }
     }
 
-    private function listProducts(string $name)
+    private function listProducts(string $name, string $searchTerm = '')
     {
         try {
-            // Lấy danh sách sản phẩm với các thông tin cần thiết
-            $products = Product::select('title', 'price', 'description', 'image')
-                ->where('status', '1')
-                ->take(10)
-                ->get();
+            $query = Product::select('title', 'price', 'description', 'image')
+                ->where('status', '1');
 
-            // Kiểm tra nếu không có sản phẩm nào
-            if ($products->isEmpty()) {
-                return $this->reply('Hiện tại chưa có sách nào.', $name, false);
+            if (!empty($searchTerm)) {
+                $keywords = array_filter(explode(' ', trim($searchTerm)));
+                $query->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $keyword) {
+                        $q->orWhere('title', 'LIKE', '%' . $keyword . '%');
+                    }
+                });
             }
 
-            // Tạo thông điệp phản hồi với thông tin chi tiết của từng sản phẩm
-            $response = "Các sách hiện có:\n";
+            $products = $query->take(10)->get();
+
+            if ($products->isEmpty()) {
+                $message = empty($searchTerm)
+                    ? 'Hiện tại chưa có sách nào.'
+                    : "Không tìm thấy sách nào phù hợp với từ khóa '$searchTerm'.";
+                return $this->reply($message, $name, false);
+            }
+
+            $response = empty($searchTerm)
+                ? "Các sách hiện có:\n"
+                : "Các sách hiện có với từ khóa '$searchTerm':\n";
             foreach ($products as $index => $product) {
-                $image = $product->image ? asset('storage/' . $product->image) : 'Không có hình ảnh';
                 $price = number_format($product->price, 0, ',', '.') . ' VNĐ';
-                $description = $product->description ? $product->description : 'Không có mô tả';
+                $description = $product->description ?: 'Không có mô tả';
+                $image = $product->image && file_exists(storage_path('app/public/' . $product->image))
+                    ? asset('storage/products' . $product->image)
+                    : 'Không có hình ảnh';
 
                 $response .= ($index + 1) . ". {$product->title}\n";
                 $response .= "- Giá: $price\n";

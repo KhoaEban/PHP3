@@ -2,7 +2,20 @@
 
 @section('content')
     <div class="container mt-4">
-        <h1 class="text-center fw-bold">Giỏ hàng</h1>
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        <h1 class="text-center fw-bold mt-4">Giỏ hàng</h1>
         <div class="row">
             <div class="col-8">
                 <div style="overflow-x: auto;">
@@ -34,7 +47,8 @@
                                                 <div style="font-weight: bold;">
                                                     {{ $item->quantity }} x {{ $item->product->title }} x
                                                     @if ($item->variant_id && $item->variant)
-                                                        {{ $item->variant->variant_type }} x {{ $item->variant->variant_value }}
+                                                        {{ $item->variant->variant_type }} x
+                                                        {{ $item->variant->variant_value }}
                                                     @endif
                                                 </div>
                                                 <div style="color: #666;">

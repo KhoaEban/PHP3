@@ -3,7 +3,17 @@
 @section('content')
     <div class="container mt-4">
         <h4>Chỉnh sửa biến thể cho sản phẩm: <strong>{{ $product->title }}</strong></h4>
-
+        <!-- Display Validation Errors -->
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
         <form action="{{ route('product_variants.update', $variant->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')

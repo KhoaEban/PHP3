@@ -34,7 +34,7 @@
                             <div class="input-container">
                                 <i class="fa fa-envelope input-icon-email"></i>
                                 <input type="email" name="email" value="{{ old('email') }}" placeholder="Email"
-                                    autocomplete="off" required>
+                                    autocomplete="off" >
                             </div>
                             @error('email')
                                 <div class="error">{{ $message }}</div>
@@ -43,7 +43,7 @@
                             <div class="input-container">
                                 <img src="{{ asset('images/l.png') }}" alt="Password Icon" class="input-icon">
                                 <input type="password" name="password" placeholder="Mật khẩu" autocomplete="off"
-                                    required>
+                                    >
                             </div>
                             @error('password')
                                 <div class="error">{{ $message }}</div>

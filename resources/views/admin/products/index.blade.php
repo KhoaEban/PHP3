@@ -27,27 +27,37 @@
         </div>
         <div class="filters">
             <div class="">
-                <select>
-                    <option>
-                        Thao tác
-                    </option>
-                </select>
-                <button>
-                    Áp dụng
-                </button>
-                <select>
-                    <option>
-                        Chọn một danh mục
-                    </option>
-                </select>
-                <select>
-                    <option>
-                        Lọc theo thương hiệu
-                    </option>
-                </select>
-                <button>
-                    Lọc
-                </button>
+                <form method="GET" action="{{ route('products.index') }}">
+                    <select>
+                        <option>
+                            Thao tác
+                        </option>
+                    </select>
+                    <button>
+                        Áp dụng
+                    </button>
+                    <select name="category">
+                        <option value="">Chọn danh mục</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}"
+                                {{ request('category') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <select name="brand">
+                        <option value="">Chọn thương hiệu</option>
+                        @foreach ($brands as $brand)
+                            <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
+                                {{ $brand->name }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit">Lọc</button>
+                </form>
+
             </div>
             <div class="">
                 {{-- Thanh tìm kiếm sản phẩm --}}
